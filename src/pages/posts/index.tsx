@@ -56,22 +56,22 @@ export default function PostsPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts]);
+  }, []);
 
   useEffect(() => {
     const page = Number(router.query.page) || 1;
     fetchPosts(page);
-  }, [router.query.page, fetchPosts]);
+  }, [router.query.page]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
-    router.push("/posts?page=1");
+    fetchPosts(1);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    router.push(`/posts?page=${page}`);
+    fetchPosts(page);
   };
 
   const clearFilters = () => {
@@ -79,7 +79,7 @@ export default function PostsPage() {
     setStartDate("");
     setEndDate("");
     setCurrentPage(1);
-    router.push("/posts?page=1");
+    fetchPosts(1);
   };
 
   return (

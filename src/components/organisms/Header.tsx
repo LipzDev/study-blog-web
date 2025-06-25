@@ -4,10 +4,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/atoms/Button";
 import { BookOpen, User, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { UserRole } from "@/types";
 
 export function Header() {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const isAdmin =
+    user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN;
 
   const handleLogout = () => {
     logout();
@@ -37,12 +41,12 @@ export function Header() {
             >
               Postagens
             </Link>
-            {user && (
+            {isAdmin && (
               <Link
-                href="/dashboard"
+                href="/gerenciar"
                 className="text-gray-700 hover:text-blue-600 transition-colors"
               >
-                Dashboard
+                Gerenciar
               </Link>
             )}
           </nav>
@@ -115,13 +119,13 @@ export function Header() {
               >
                 Postagens
               </Link>
-              {user && (
+              {isAdmin && (
                 <Link
-                  href="/dashboard"
+                  href="/gerenciar"
                   className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Dashboard
+                  Gerenciar
                 </Link>
               )}
 

@@ -3,15 +3,20 @@ import { Layout } from "@/components/templates/Layout";
 import { PageHead } from "@/components/atoms/PageHead";
 import { PostCard } from "@/components/molecules/PostCard";
 import { Button } from "@/components/atoms/Button";
-import { Post } from "@/types";
+import { Post, UserRole } from "@/types";
 import { apiService } from "@/services/api";
-import { BookOpen, ArrowRight, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { BookOpen, ArrowRight, Loader2, Plus } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
+  const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const isAdmin =
+    user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN;
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -62,15 +67,29 @@ export default function HomePage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/register">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-blue-600"
-                >
-                  Criar Conta
-                </Button>
-              </Link>
+              {isAdmin && (
+                <Link href="/posts/create">
+                  <Button
+                    size="lg"
+                    variant="primary"
+                    className="bg-white text-blue-600 hover:bg-gray-100"
+                  >
+                    <Plus className="mr-2 h-5 w-5" />
+                    Criar Postagem
+                  </Button>
+                </Link>
+              )}
+              {!user && (
+                <Link href="/register">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white text-white hover:bg-white hover:text-blue-600"
+                  >
+                    Criar Conta
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

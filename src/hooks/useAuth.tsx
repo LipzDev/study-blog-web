@@ -10,6 +10,9 @@ interface AuthContextType {
   logout: () => void;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
+  resendVerification: (email: string) => Promise<void>;
+  checkVerificationStatus: (email: string) => Promise<boolean>;
+  verifyEmail: (token: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -83,6 +86,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resendVerification = async (email: string) => {
+    try {
+      await apiService.resendVerification(email);
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || "Erro ao reenviar verificação",
+      );
+    }
+  };
+
+  const checkVerificationStatus = async (email: string): Promise<boolean> => {
+    try {
+      const response = await apiService.checkVerificationStatus(email);
+      return response.data?.verified || false;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message ||
+          "Erro ao verificar status de verificação",
+      );
+    }
+  };
+
+  const verifyEmail = async (token: string) => {
+    try {
+      await apiService.verifyEmail(token);
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || "Erro ao verificar email",
+      );
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -93,6 +128,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         forgotPassword,
         resetPassword,
+        resendVerification,
+        checkVerificationStatus,
+        verifyEmail,
       }}
     >
       {children}

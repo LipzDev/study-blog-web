@@ -88,6 +88,22 @@ class ApiService {
     return response.data;
   }
 
+  async resendVerification(email: string): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.post(
+      "/auth/resend-verification",
+      { email },
+    );
+    return response.data;
+  }
+
+  async checkVerificationStatus(email: string): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.post(
+      "/auth/check-verification-status",
+      { email },
+    );
+    return response.data;
+  }
+
   async getProfile(): Promise<User> {
     const response: AxiosResponse<User> = await this.api.get("/auth/profile");
     return response.data;
@@ -178,14 +194,29 @@ class ApiService {
 
   async promoteToAdmin(userId: string): Promise<ApiResponse> {
     const response: AxiosResponse<ApiResponse> = await this.api.patch(
-      `/users/${userId}/promote`,
+      `/users/${userId}/promote-admin`,
     );
     return response.data;
   }
 
   async demoteFromAdmin(userId: string): Promise<ApiResponse> {
     const response: AxiosResponse<ApiResponse> = await this.api.patch(
-      `/users/${userId}/demote`,
+      `/users/${userId}/revoke-admin`,
+    );
+    return response.data;
+  }
+
+  async deleteUser(userId: string): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.delete(
+      `/users/${userId}`,
+    );
+    return response.data;
+  }
+
+  async updateUserName(userId: string, name: string): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.patch(
+      `/users/${userId}/name`,
+      { name },
     );
     return response.data;
   }

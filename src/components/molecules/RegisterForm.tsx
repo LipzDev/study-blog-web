@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { registerSchema, RegisterFormData } from "@/utils/schemas";
 import { Button } from "@/components/atoms/Button";
 import { Input } from "@/components/atoms/Input";
+import { PasswordInput } from "@/components/atoms/PasswordInput";
 import {
   Card,
   CardContent,
@@ -17,8 +18,6 @@ import Link from "next/link";
 
 export function RegisterForm() {
   const { register: registerUser } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -111,48 +110,21 @@ export function RegisterForm() {
                   />
 
                   <div className="relative">
-                    <Input
+                    <PasswordInput
                       label="Senha"
-                      type={showPassword ? "text" : "password"}
+                      type="password"
                       placeholder="Mínimo 6 caracteres"
                       error={errors.password?.message}
                       {...register("password")}
                     />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
                   </div>
 
-                  <div className="relative">
-                    <Input
-                      label="Confirmar senha"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirme sua senha"
-                      error={errors.confirmPassword?.message}
-                      {...register("confirmPassword")}
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
+                  <PasswordInput
+                    label="Confirmar senha"
+                    placeholder="Confirme sua senha"
+                    error={errors.confirmPassword?.message}
+                    {...register("confirmPassword")}
+                  />
 
                   <Button
                     type="submit"
