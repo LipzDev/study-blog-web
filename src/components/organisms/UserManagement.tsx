@@ -98,7 +98,10 @@ export function UserManagement() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchTerm.trim()) return;
+    if (!searchTerm.trim()) {
+      setSearchResults(null);
+      return;
+    }
 
     try {
       setSearchLoading(true);
@@ -347,8 +350,8 @@ export function UserManagement() {
         <CardHeader>
           <CardTitle>Buscar Usuário</CardTitle>
           <CardDescription>
-            Digite o email ou nome do usuário. O sistema detecta automaticamente
-            o tipo de busca. Máximo 4 usuários por página.
+            Digite o email ou nome do usuário. Dica: Expanda os cards para ver
+            as ações disponíveis.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -356,7 +359,12 @@ export function UserManagement() {
             <Input
               placeholder="Ex: joao@email.com ou João Silva"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                if (e.target.value.trim() === "") {
+                  setSearchResults(null);
+                }
+              }}
               className="flex-1"
             />
             <Button
@@ -452,9 +460,9 @@ export function UserManagement() {
                       {/* Conteúdo expandido */}
                       {isExpanded && (
                         <div className="p-4">
-                          <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] md:grid-cols-2 gap-4 w-full">
+                          <div className="flex flex-col md:flex-row gap-4 w-full">
                             {/* Informações detalhadas */}
-                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 md:w-1/3">
                               <div className="flex items-center gap-2 mb-1">
                                 <svg
                                   className="h-4 w-4 text-gray-500"
@@ -479,7 +487,7 @@ export function UserManagement() {
                             </div>
 
                             {/* Seção de ações */}
-                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex flex-col justify-between">
+                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 md:w-2/3 flex flex-col justify-between">
                               <h5 className="font-medium text-gray-900 mb-3 text-sm">
                                 Ações Disponíveis
                               </h5>
