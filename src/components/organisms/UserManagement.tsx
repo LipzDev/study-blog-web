@@ -22,6 +22,8 @@ import {
   CheckCircle,
   AlertTriangle,
   X,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 export function UserManagement() {
@@ -48,6 +50,7 @@ export function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentSearchPage, setCurrentSearchPage] = useState(1);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   // Estados dos modais
   const [showPromoteModal, setShowPromoteModal] = useState(false);
@@ -100,6 +103,7 @@ export function UserManagement() {
     try {
       setSearchLoading(true);
       setError(null);
+      setExpandedCards(new Set()); // Reset expanded cards on new search
 
       const searchType = detectSearchType(searchTerm.trim());
       const searchParams =
@@ -111,7 +115,7 @@ export function UserManagement() {
         searchParams.email,
         searchParams.name,
         currentSearchPage,
-        10,
+        4, // Limitar a 4 cards por página
       );
       setSearchResults(result);
     } catch (err: unknown) {
@@ -132,6 +136,7 @@ export function UserManagement() {
     try {
       setSearchLoading(true);
       setError(null);
+      setExpandedCards(new Set()); // Reset expanded cards on page change
 
       const searchType = detectSearchType(searchTerm.trim());
       const searchParams =
@@ -143,7 +148,7 @@ export function UserManagement() {
         searchParams.email,
         searchParams.name,
         newPage,
-        10,
+        4, // Limitar a 4 cards por página
       );
       setSearchResults(result);
       setCurrentSearchPage(newPage);
@@ -152,6 +157,16 @@ export function UserManagement() {
     } finally {
       setSearchLoading(false);
     }
+  };
+
+  const toggleCardExpansion = (userId: string) => {
+    const newExpandedCards = new Set(expandedCards);
+    if (newExpandedCards.has(userId)) {
+      newExpandedCards.delete(userId);
+    } else {
+      newExpandedCards.add(userId);
+    }
+    setExpandedCards(newExpandedCards);
   };
 
   const canDeleteUser = (user: User) => {
@@ -333,7 +348,7 @@ export function UserManagement() {
           <CardTitle>Buscar Usuário</CardTitle>
           <CardDescription>
             Digite o email ou nome do usuário. O sistema detecta automaticamente
-            o tipo de busca.
+            o tipo de busca. Máximo 4 usuários por página.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -356,9 +371,9 @@ export function UserManagement() {
           </form>
 
           {searchResults && (
-            <div className="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="mt-6 space-y-4">
               {/* Header do resultado */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border border-gray-200 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -387,201 +402,195 @@ export function UserManagement() {
                 </div>
               </div>
 
-              {/* Conteúdo principal */}
-              <div className="p-6">
-                {searchResults.users.map((user, index) => (
-                  <div
-                    key={user.id}
-                    className={`${index > 0 ? "border-t border-gray-100 pt-6 mt-6" : ""}`}
-                  >
-                    {/* Informações do usuário em cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <UserIcon className="h-4 w-4 text-gray-500" />
-                          <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
-                            Nome
-                          </span>
-                        </div>
-                        <p className="font-medium text-gray-900">{user.name}</p>
-                      </div>
+              {/* Cards dos usuários */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {searchResults.users.map((user) => {
+                  const isExpanded = expandedCards.has(user.id);
 
-                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <svg
-                            className="h-4 w-4 text-gray-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            />
-                          </svg>
-                          <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
-                            Email
-                          </span>
-                        </div>
-                        <p className="font-medium text-gray-900">
-                          {user.email}
-                        </p>
-                      </div>
-
-                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Shield className="h-4 w-4 text-gray-500" />
-                          <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
-                            Cargo
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="relative top-0.5">
-                            {getRoleIcon(user.role)}
-                          </span>
-                          <span className="font-medium text-gray-900">
-                            {getRoleLabel(user.role)}
-                          </span>
+                  return (
+                    <div
+                      key={user.id}
+                      className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md"
+                    >
+                      {/* Header do card */}
+                      <div className="bg-gray-50 px-4 py-3 border-b border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <UserIcon className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">
+                                {user.name}
+                              </h4>
+                              <p className="text-sm text-gray-600">
+                                {user.email}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              {getRoleIcon(user.role)}
+                              <span className="text-sm text-gray-600">
+                                {getRoleLabel(user.role)}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => toggleCardExpansion(user.id)}
+                              className="p-1 hover:bg-gray-200 rounded transition-colors"
+                            >
+                              {isExpanded ? (
+                                <ChevronUp className="h-4 w-4 text-gray-500" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4 text-gray-500" />
+                              )}
+                            </button>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <svg
-                            className="h-4 w-4 text-gray-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
-                            />
-                          </svg>
-                          <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
-                            Criado em
-                          </span>
+                      {/* Conteúdo expandido */}
+                      {isExpanded && (
+                        <div className="p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] md:grid-cols-2 gap-4 w-full">
+                            {/* Informações detalhadas */}
+                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                              <div className="flex items-center gap-2 mb-1">
+                                <svg
+                                  className="h-4 w-4 text-gray-500"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
+                                  />
+                                </svg>
+                                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                  Criado em
+                                </span>
+                              </div>
+                              <p className="font-medium text-gray-900">
+                                {formatDate(user.createdAt)}
+                              </p>
+                            </div>
+
+                            {/* Seção de ações */}
+                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex flex-col justify-between">
+                              <h5 className="font-medium text-gray-900 mb-3 text-sm">
+                                Ações Disponíveis
+                              </h5>
+
+                              <div className="space-y-2">
+                                {/* Verificar se é o próprio usuário */}
+                                {user.id === currentUser?.id && (
+                                  <p className="text-xs text-gray-600">
+                                    Você não pode manipular sua própria conta.
+                                  </p>
+                                )}
+
+                                {/* Verificar se é super admin */}
+                                {user.role === UserRole?.SUPER_ADMIN &&
+                                  user.id !== currentUser?.id && (
+                                    <p className="text-xs text-gray-600">
+                                      Não é possivel modificar o cargo ou
+                                      excluir um super admin.
+                                    </p>
+                                  )}
+
+                                {/* Ações disponíveis apenas se não for o próprio usuário */}
+                                {user.id !== currentUser?.id && (
+                                  <div className="flex flex-row gap-2">
+                                    {canPromoteUser(user) && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => openPromoteModal(user)}
+                                        className="bg-white hover:bg-blue-50 text-blue-600 border-blue-300 hover:border-blue-400 shadow-sm text-xs"
+                                      >
+                                        <Shield className="h-3 w-3 mr-1" />
+                                        Promover a Admin
+                                      </Button>
+                                    )}
+                                    {canDemoteUser(user) && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => openDemoteModal(user)}
+                                        className="bg-white hover:bg-orange-50 text-orange-600 border-orange-300 hover:border-orange-400 shadow-sm text-xs"
+                                      >
+                                        <UserIcon className="h-3 w-3 mr-1" />
+                                        Remover Admin
+                                      </Button>
+                                    )}
+                                    {canDeleteUser(user) && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => openDeleteModal(user)}
+                                        className="bg-white hover:bg-red-50 text-red-600 border-red-300 hover:border-red-400 shadow-sm text-xs"
+                                      >
+                                        <Trash2 className="h-3 w-3 mr-1" />
+                                        Excluir Usuário
+                                      </Button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <p className="font-medium text-gray-900">
-                          {formatDate(user.createdAt)}
-                        </p>
-                      </div>
+                      )}
                     </div>
-
-                    {/* Seção de ações */}
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                      <h4 className="font-medium text-gray-900 mb-3">
-                        Ações Disponíveis
-                      </h4>
-
-                      <div className="flex flex-wrap gap-3">
-                        {/* Verificar se é o próprio usuário */}
-                        {user.id === currentUser?.id && (
-                          <p className="text-gray-600">
-                            Você não pode manipular sua própria conta.
-                          </p>
-                        )}
-
-                        {/* Verificar se é super admin */}
-                        {user.role === UserRole?.SUPER_ADMIN &&
-                          user.id !== currentUser?.id && (
-                            <p className="text-gray-600">
-                              Não é possivel modificar o cargo ou excluir um
-                              super admin.
-                            </p>
-                          )}
-
-                        {/* Ações disponíveis apenas se não for o próprio usuário */}
-                        {user.id !== currentUser?.id && (
-                          <>
-                            {canPromoteUser(user) && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => openPromoteModal(user)}
-                                className="bg-white hover:bg-blue-50 text-blue-600 border-blue-300 hover:border-blue-400 shadow-sm"
-                              >
-                                <Shield className="h-3 w-3 mr-2" />
-                                Promover a Admin
-                              </Button>
-                            )}
-                            {canDemoteUser(user) && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => openDemoteModal(user)}
-                                className="bg-white hover:bg-orange-50 text-orange-600 border-orange-300 hover:border-orange-400 shadow-sm"
-                              >
-                                <UserIcon className="h-3 w-3 mr-2" />
-                                Remover Admin
-                              </Button>
-                            )}
-                            {canDeleteUser(user) && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => openDeleteModal(user)}
-                                className="bg-white hover:bg-red-50 text-red-600 border-red-300 hover:border-red-400 shadow-sm"
-                              >
-                                <Trash2 className="h-3 w-3 mr-2" />
-                                Excluir Usuário
-                              </Button>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Paginação */}
-                {searchResults.totalPages > 1 && (
-                  <div className="mt-6 flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      Mostrando{" "}
-                      {(searchResults.page - 1) * searchResults.limit + 1} a{" "}
-                      {Math.min(
-                        searchResults.page * searchResults.limit,
-                        searchResults.total,
-                      )}{" "}
-                      de {searchResults.total} resultados
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          handleSearchPageChange(searchResults.page - 1)
-                        }
-                        disabled={searchResults.page <= 1 || searchLoading}
-                      >
-                        Anterior
-                      </Button>
-                      <span className="text-sm text-gray-600">
-                        Página {searchResults.page} de{" "}
-                        {searchResults.totalPages}
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          handleSearchPageChange(searchResults.page + 1)
-                        }
-                        disabled={
-                          searchResults.page >= searchResults.totalPages ||
-                          searchLoading
-                        }
-                      >
-                        Próxima
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                  );
+                })}
               </div>
+
+              {/* Paginação */}
+              {searchResults.totalPages > 1 && (
+                <div className="mt-6 flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Mostrando{" "}
+                    {(searchResults.page - 1) * searchResults.limit + 1} a{" "}
+                    {Math.min(
+                      searchResults.page * searchResults.limit,
+                      searchResults.total,
+                    )}{" "}
+                    de {searchResults.total} resultados
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        handleSearchPageChange(searchResults.page - 1)
+                      }
+                      disabled={searchResults.page <= 1 || searchLoading}
+                    >
+                      Anterior
+                    </Button>
+                    <span className="text-sm text-gray-600">
+                      Página {searchResults.page} de {searchResults.totalPages}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        handleSearchPageChange(searchResults.page + 1)
+                      }
+                      disabled={
+                        searchResults.page >= searchResults.totalPages ||
+                        searchLoading
+                      }
+                    >
+                      Próxima
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
