@@ -19,7 +19,7 @@ class ApiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
       headers: {
         "Content-Type": "application/json",
       },
@@ -110,6 +110,32 @@ class ApiService {
 
   async getProfile(): Promise<User> {
     const response: AxiosResponse<User> = await this.api.get("/auth/profile");
+    return response.data;
+  }
+
+  async updateProfile(data: {
+    name?: string;
+    bio?: string;
+    github?: string;
+    linkedin?: string;
+    twitter?: string;
+    instagram?: string;
+  }): Promise<{ message: string; user: User }> {
+    const response: AxiosResponse<{ message: string; user: User }> =
+      await this.api.patch("/auth/profile", data);
+    return response.data;
+  }
+
+  async uploadAvatar(file: File): Promise<{ message: string; user: User }> {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const response: AxiosResponse<{ message: string; user: User }> =
+      await this.api.post("/auth/upload-avatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
     return response.data;
   }
 

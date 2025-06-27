@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/atoms/Button";
+import { Avatar } from "@/components/atoms/Avatar";
 import { BookOpen, User, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { UserRole } from "@/types";
@@ -55,10 +56,20 @@ export function Header() {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-700">{user.name}</span>
-                </div>
+                <Link
+                  href="/perfil"
+                  className="flex items-center space-x-2 group focus:outline-none focus:ring-2 focus:ring-blue-500 rounded transition"
+                >
+                  <Avatar
+                    src={user.avatar}
+                    alt="Avatar"
+                    name={user.name}
+                    size="md"
+                  />
+                  <span className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 transition underline-offset-4 ">
+                    {user.name}
+                  </span>
+                </Link>
                 <Button
                   variant="outline"
                   size="sm"
@@ -131,10 +142,20 @@ export function Header() {
 
               {user ? (
                 <div className="px-3 py-2">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">{user.name}</span>
-                  </div>
+                  <Link
+                    href="/perfil"
+                    className="flex items-center space-x-2 mb-2 group focus:outline-none focus:ring-2 focus:ring-blue-500 rounded transition"
+                  >
+                    <Avatar
+                      src={user.avatar}
+                      alt="Avatar"
+                      name={user.name}
+                      size="sm"
+                    />
+                    <span className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 transition underline-offset-4 group-hover:underline">
+                      {user.name}
+                    </span>
+                  </Link>
                   <Button
                     variant="outline"
                     size="sm"

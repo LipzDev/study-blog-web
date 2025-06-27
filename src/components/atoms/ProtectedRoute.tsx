@@ -22,7 +22,11 @@ export function ProtectedRoute({
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
-    } else if (!loading && user && !requiredRoles.includes(user.role)) {
+    } else if (
+      !loading &&
+      user &&
+      !requiredRoles.includes(user.role as UserRole)
+    ) {
       router.push("/");
     }
   }, [user, loading, requiredRoles, router]);
@@ -42,7 +46,7 @@ export function ProtectedRoute({
     return null; // Será redirecionado para login
   }
 
-  if (!requiredRoles.includes(user.role)) {
+  if (!requiredRoles.includes(user.role as UserRole)) {
     return (
       fallback || (
         <div className="min-h-screen flex items-center justify-center">

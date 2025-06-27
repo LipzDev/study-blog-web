@@ -13,6 +13,7 @@ interface AuthContextType {
   resendVerification: (email: string) => Promise<void>;
   checkVerificationStatus: (email: string) => Promise<boolean>;
   verifyEmail: (token: string) => Promise<void>;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -135,6 +136,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUser = (user: User) => {
+    setUser(user);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -148,6 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         resendVerification,
         checkVerificationStatus,
         verifyEmail,
+        updateUser,
       }}
     >
       {children}

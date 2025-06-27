@@ -306,6 +306,12 @@ export function UserManagement() {
     }
   };
 
+  const toUserRole = (role: string): UserRole => {
+    if (role === UserRole.ADMIN) return UserRole.ADMIN;
+    if (role === UserRole.SUPER_ADMIN) return UserRole.SUPER_ADMIN;
+    return UserRole.USER;
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -438,9 +444,9 @@ export function UserManagement() {
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1">
-                              {getRoleIcon(user.role)}
+                              {getRoleIcon(toUserRole(user.role))}
                               <span className="text-sm text-gray-600">
-                                {getRoleLabel(user.role)}
+                                {getRoleLabel(toUserRole(user.role))}
                               </span>
                             </div>
                             <button
@@ -657,9 +663,9 @@ export function UserManagement() {
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
                             <span className="relative top-0.5">
-                              {getRoleIcon(user.role)}
+                              {getRoleIcon(toUserRole(user.role))}
                             </span>
-                            <span>{getRoleLabel(user.role)}</span>
+                            <span>{getRoleLabel(toUserRole(user.role))}</span>
                           </div>
                         </td>
                         <td className="py-3 px-4">
@@ -812,7 +818,7 @@ export function UserManagement() {
                     </div>
                     <div>
                       <span className="font-medium">Cargo atual:</span>{" "}
-                      {getRoleLabel(selectedUser.role)}
+                      {getRoleLabel(toUserRole(selectedUser.role))}
                     </div>
                   </div>
                 </div>
@@ -902,7 +908,7 @@ export function UserManagement() {
                     </div>
                     <div>
                       <span className="font-medium">Cargo atual:</span>{" "}
-                      {getRoleLabel(selectedUser.role)}
+                      {getRoleLabel(toUserRole(selectedUser.role))}
                     </div>
                   </div>
                 </div>
@@ -992,7 +998,7 @@ export function UserManagement() {
                     </div>
                     <div>
                       <span className="font-medium">Cargo:</span>{" "}
-                      {getRoleLabel(selectedUser.role)}
+                      {getRoleLabel(toUserRole(selectedUser.role))}
                     </div>
                     <div>
                       <span className="font-medium">Membro desde:</span>{" "}

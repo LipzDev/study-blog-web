@@ -11,15 +11,19 @@ export enum UserProvider {
 
 export interface User {
   id: string;
-  email: string;
   name: string;
-  provider: UserProvider;
-  providerId?: string;
+  email: string;
   avatar?: string;
-  emailVerified: boolean;
-  role: UserRole;
+  bio?: string;
+  github?: string;
+  linkedin?: string;
+  twitter?: string;
+  instagram?: string;
   createdAt: string;
   updatedAt: string;
+  role: string;
+  emailVerified?: boolean;
+  provider?: string;
 }
 
 export interface Post {
