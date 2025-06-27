@@ -109,15 +109,12 @@ export function RegisterForm() {
                     {...register("email")}
                   />
 
-                  <div className="relative">
-                    <PasswordInput
-                      label="Senha"
-                      type="password"
-                      placeholder="Mínimo 6 caracteres"
-                      error={errors.password?.message}
-                      {...register("password")}
-                    />
-                  </div>
+                  <PasswordInput
+                    label="Senha"
+                    placeholder="Mínimo 6 caracteres"
+                    error={errors.password?.message}
+                    {...register("password")}
+                  />
 
                   <PasswordInput
                     label="Confirmar senha"

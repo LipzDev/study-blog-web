@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,14 +18,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 export function LoginForm() {
-  const { login, checkVerificationStatus, resendVerification } = useAuth();
+  const { login, resendVerification, checkVerificationStatus } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [verificationMessage, setVerificationMessage] = useState<string | null>(
-    null,
-  );
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const [showResendButton, setShowResendButton] = useState(false);
+  const [currentEmail, setCurrentEmail] = useState<string>("");
+  const [isCheckingVerification, setIsCheckingVerification] = useState(false);
   const router = useRouter();
 
   const {
@@ -40,40 +39,20 @@ export function LoginForm() {
 
   const email = watch("email");
 
-  // Verificar status de verificação quando email mudar
+  // Atualizar email atual quando mudar
   useEffect(() => {
-    if (email && email.includes("@")) {
-      const checkVerification = async () => {
-        try {
-          const verified = await checkVerificationStatus(email);
-          setIsVerified(verified);
-          if (!verified) {
-            setVerificationMessage("Verifique seu email antes de logar");
-            // Limpar mensagem após 10 segundos
-            setTimeout(() => setVerificationMessage(null), 10000);
-          } else {
-            setVerificationMessage(null);
-          }
-        } catch (error) {
-          // Silenciar erro, não mostrar mensagem de erro para verificação
-        }
-      };
-
-      const timeoutId = setTimeout(checkVerification, 1000);
-      return () => clearTimeout(timeoutId);
+    if (email) {
+      setCurrentEmail(email);
     }
-  }, [email, checkVerificationStatus]);
+  }, [email]);
 
   const handleResendVerification = async () => {
-    if (!email) return;
+    if (!currentEmail) return;
 
     try {
       setIsResending(true);
-      await resendVerification(email);
-      setVerificationMessage(
-        "Email de verificação reenviado! Verifique sua caixa de entrada.",
-      );
-      setTimeout(() => setVerificationMessage(null), 5000);
+      await resendVerification(currentEmail);
+      // Não mostrar mensagem de sucesso, apenas silenciosamente reenviar
     } catch (error: any) {
       setError(error.message || "Erro ao reenviar verificação");
     } finally {
@@ -85,17 +64,34 @@ export function LoginForm() {
     try {
       setIsLoading(true);
       setError(null);
-      await login(data.email, data.password)
-        .then(() => {
-          router.push("/");
-        })
-        .catch((err: any) => {
-          setError(err.message || "Erro ao fazer login");
-        });
+      setShowResendButton(false);
+
+      // PRIMEIRA REQUISIÇÃO: Verificar se o email está verificado
+      setIsCheckingVerification(true);
+      const isVerified = await checkVerificationStatus(data.email);
+      setIsCheckingVerification(false);
+
+      if (!isVerified) {
+        // Se não estiver verificado, mostrar botão de reenvio e parar aqui
+        setShowResendButton(true);
+        setCurrentEmail(data.email);
+        setError("Verifique seu email antes de fazer login");
+        return;
+      }
+
+      // SEGUNDA REQUISIÇÃO: Se estiver verificado, fazer login
+      await login(data.email, data.password);
+      router.push("/");
     } catch (err: any) {
+      // Se houver erro na verificação, mostrar botão de reenvio
+      if (err.message && err.message.includes("Verifique seu email")) {
+        setShowResendButton(true);
+        setCurrentEmail(data.email);
+      }
       setError(err.message || "Erro ao fazer login");
     } finally {
       setIsLoading(false);
+      setIsCheckingVerification(false);
     }
   };
 
@@ -123,40 +119,29 @@ export function LoginForm() {
             <CardDescription>
               Digite suas credenciais para acessar sua conta
             </CardDescription>
+            {error && (
+              <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                <span className="text-sm text-red-700">{error}</span>
+              </div>
+            )}
+            {showResendButton && (
+              <div className="mt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleResendVerification}
+                  loading={isResending}
+                  disabled={isResending}
+                  className="w-full text-blue-700 border-blue-300 hover:bg-blue-100 hover:text-blue-800"
+                >
+                  Reenviar verificação de email
+                </Button>
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {error && (
-                <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-md">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
-                  <span className="text-sm text-red-700">{error}</span>
-                </div>
-              )}
-
-              {verificationMessage && (
-                <div className="flex flex-col space-y-3 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                  <div className="flex items-center space-x-2">
-                    <AlertCircle className="h-5 w-5 text-yellow-500" />
-                    <span className="text-sm text-yellow-700 font-medium">
-                      {verificationMessage}
-                    </span>
-                  </div>
-                  {isVerified === false && email && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleResendVerification}
-                      loading={isResending}
-                      disabled={isResending}
-                      className="self-start text-yellow-700 border-yellow-300 hover:bg-yellow-100"
-                    >
-                      Reenviar verificação
-                    </Button>
-                  )}
-                </div>
-              )}
-
               <div className="w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -193,10 +178,10 @@ export function LoginForm() {
               <Button
                 type="submit"
                 className="w-full"
-                loading={isLoading}
-                disabled={isLoading}
+                loading={isLoading || isCheckingVerification}
+                disabled={isLoading || isCheckingVerification}
               >
-                Entrar
+                {isCheckingVerification ? "Verificando..." : "Entrar"}
               </Button>
             </form>
           </CardContent>

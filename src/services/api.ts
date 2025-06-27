@@ -185,9 +185,13 @@ class ApiService {
     return response.data;
   }
 
-  async searchUser(email: string): Promise<User> {
+  async searchUser(email?: string, name?: string): Promise<User> {
+    const params = new URLSearchParams();
+    if (email) params.append("email", email);
+    if (name) params.append("name", name);
+
     const response: AxiosResponse<User> = await this.api.get(
-      `/users/search?email=${email}`,
+      `/users/search?${params.toString()}`,
     );
     return response.data;
   }

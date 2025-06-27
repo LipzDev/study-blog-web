@@ -39,9 +39,10 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
           />
           <button
             type="button"
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10 cursor-pointer"
             onClick={() => setShowPassword(!showPassword)}
             tabIndex={-1}
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />

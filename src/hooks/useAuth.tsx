@@ -99,12 +99,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkVerificationStatus = async (email: string): Promise<boolean> => {
     try {
       const response = await apiService.checkVerificationStatus(email);
-      return response.data?.verified || false;
+      return response.verified || false;
     } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message ||
-          "Erro ao verificar status de verificação",
-      );
+      console.warn("Erro ao verificar status:", error);
+      return false;
     }
   };
 

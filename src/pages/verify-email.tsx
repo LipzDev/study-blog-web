@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/atoms/Card";
-import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function VerifyEmailPage() {
@@ -88,9 +88,15 @@ export default function VerifyEmailPage() {
                     Email verificado!
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">{message}</p>
-                  <Link href="/login">
-                    <Button variant="primary">Ir para o login</Button>
-                  </Link>
+                  <div className="text-center">
+                    <Link
+                      href="/login"
+                      className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-1" />
+                      Voltar para o login
+                    </Link>
+                  </div>
                 </>
               )}
 
