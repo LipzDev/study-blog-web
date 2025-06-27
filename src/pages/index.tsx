@@ -27,7 +27,7 @@ export default function HomePage() {
           limit: 6,
         });
         setPosts(response.posts);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError("Erro ao carregar postagens");
         console.error("Erro ao carregar postagens:", err);
       } finally {

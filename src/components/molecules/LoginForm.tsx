@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/hooks/useAuth";
 import { loginSchema, LoginFormData } from "@/utils/schemas";
 import { Button } from "@/components/atoms/Button";
-import { Input } from "@/components/atoms/Input";
 import { PasswordInput } from "@/components/atoms/PasswordInput";
 import {
   Card,
@@ -13,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/atoms/Card";
-import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -53,8 +52,10 @@ export function LoginForm() {
       setIsResending(true);
       await resendVerification(currentEmail);
       // Não mostrar mensagem de sucesso, apenas silenciosamente reenviar
-    } catch (error: any) {
-      setError(error.message || "Erro ao reenviar verificação");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao reenviar verificação";
+      setError(errorMessage);
     } finally {
       setIsResending(false);
     }
@@ -66,29 +67,82 @@ export function LoginForm() {
       setError(null);
       setShowResendButton(false);
 
-      // PRIMEIRA REQUISIÇÃO: Verificar se o email está verificado
-      setIsCheckingVerification(true);
-      const isVerified = await checkVerificationStatus(data.email);
-      setIsCheckingVerification(false);
+      // PRIMEIRA TENTATIVA: Tentar fazer login diretamente
+      await login(data.email, data.password);
+      router.push("/");
+    } catch (err: unknown) {
+      // Extrair a mensagem de erro correta do erro HTTP
+      let errorMessage = "Erro ao fazer login";
 
-      if (!isVerified) {
-        // Se não estiver verificado, mostrar botão de reenvio e parar aqui
-        setShowResendButton(true);
-        setCurrentEmail(data.email);
-        setError("Verifique seu email antes de fazer login");
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as any;
+        if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        } else if (axiosError.response?.status === 401) {
+          errorMessage = "Credenciais inválidas";
+        } else if (axiosError.message) {
+          errorMessage = axiosError.message;
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      // Verificar se o erro é específico sobre email não verificado
+      if (
+        errorMessage.toLowerCase().includes("verificar") ||
+        errorMessage.toLowerCase().includes("verificado") ||
+        errorMessage.toLowerCase().includes("confirme")
+      ) {
+        try {
+          // Verificar se o email realmente existe e não está verificado
+          const isVerified = await checkVerificationStatus(data.email);
+
+          if (!isVerified) {
+            // Email existe mas não está verificado
+            setShowResendButton(true);
+            setCurrentEmail(data.email);
+            setError("Verifique seu email antes de fazer login");
+            return;
+          }
+        } catch (verificationError: unknown) {
+          // Se houver erro na verificação, provavelmente o email não existe
+          console.warn("Erro ao verificar status:", verificationError);
+        }
+      }
+
+      // Verificar se o erro é específico sobre email não existir (não credenciais inválidas)
+      const isEmailNotFound =
+        errorMessage.toLowerCase().includes("não encontrado") ||
+        errorMessage.toLowerCase().includes("nao encontrado") ||
+        errorMessage.toLowerCase().includes("não existe") ||
+        errorMessage.toLowerCase().includes("nao existe") ||
+        errorMessage.toLowerCase().includes("user not found") ||
+        errorMessage.toLowerCase().includes("usuário não encontrado") ||
+        errorMessage.toLowerCase().includes("usuario nao encontrado") ||
+        errorMessage.toLowerCase().includes("email não encontrado") ||
+        errorMessage.toLowerCase().includes("email nao encontrado");
+
+      // Se o erro indica especificamente que o email não existe
+      if (isEmailNotFound) {
+        setError(
+          `O email "${data.email}" não está cadastrado em nossa plataforma. Verifique se digitou corretamente ou crie uma nova conta.`,
+        );
         return;
       }
 
-      // SEGUNDA REQUISIÇÃO: Se estiver verificado, fazer login
-      await login(data.email, data.password);
-      router.push("/");
-    } catch (err: any) {
-      // Se houver erro na verificação, mostrar botão de reenvio
-      if (err.message && err.message.includes("Verifique seu email")) {
-        setShowResendButton(true);
-        setCurrentEmail(data.email);
+      // Se chegou aqui, é um erro de login normal (senha incorreta, credenciais inválidas, etc.)
+      // Para erros 401 ou credenciais inválidas, mostrar mensagem genérica de segurança
+      if (
+        errorMessage.toLowerCase().includes("credenciais") ||
+        errorMessage.toLowerCase().includes("invalid") ||
+        errorMessage.toLowerCase().includes("401")
+      ) {
+        setError(
+          "Email ou senha incorretos. Verifique suas credenciais e tente novamente.",
+        );
+      } else {
+        setError(errorMessage);
       }
-      setError(err.message || "Erro ao fazer login");
     } finally {
       setIsLoading(false);
       setIsCheckingVerification(false);

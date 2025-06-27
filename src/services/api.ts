@@ -38,7 +38,11 @@ class ApiService {
     this.api.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (error.response?.status === 401) {
+        // Só redirecionar se não estivermos na página de login
+        if (
+          error.response?.status === 401 &&
+          window.location.pathname !== "/login"
+        ) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           window.location.href = "/login";
@@ -180,19 +184,55 @@ class ApiService {
   }
 
   // Users endpoints (admin only)
-  async getAllUsers(): Promise<User[]> {
-    const response: AxiosResponse<User[]> = await this.api.get("/users");
+  async getAllUsers(
+    page?: number,
+    limit?: number,
+  ): Promise<{
+    users: User[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const params = new URLSearchParams();
+    if (page) params.append("page", page.toString());
+    if (limit) params.append("limit", limit.toString());
+
+    const response: AxiosResponse<{
+      users: User[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }> = await this.api.get(`/users?${params.toString()}`);
     return response.data;
   }
 
-  async searchUser(email?: string, name?: string): Promise<User> {
+  async searchUser(
+    email?: string,
+    name?: string,
+    page?: number,
+    limit?: number,
+  ): Promise<{
+    users: User[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
     const params = new URLSearchParams();
     if (email) params.append("email", email);
     if (name) params.append("name", name);
+    if (page) params.append("page", page.toString());
+    if (limit) params.append("limit", limit.toString());
 
-    const response: AxiosResponse<User> = await this.api.get(
-      `/users/search?${params.toString()}`,
-    );
+    const response: AxiosResponse<{
+      users: User[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }> = await this.api.get(`/users/search?${params.toString()}`);
     return response.data;
   }
 

@@ -30,7 +30,13 @@ export default function PostsPage() {
     async (page: number = 1) => {
       try {
         setLoading(true);
-        const params: any = {
+        const params: {
+          page: number;
+          limit: number;
+          search?: string;
+          startDate?: string;
+          endDate?: string;
+        } = {
           page,
           limit: 12,
         };
@@ -44,7 +50,7 @@ export default function PostsPage() {
         setPosts(response.posts);
         setTotalPages(response.totalPages);
         setCurrentPage(response.page);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError("Erro ao carregar postagens");
         console.error("Erro ao carregar postagens:", err);
       } finally {
@@ -56,12 +62,12 @@ export default function PostsPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [fetchPosts]);
 
   useEffect(() => {
     const page = Number(router.query.page) || 1;
     fetchPosts(page);
-  }, [router.query.page]);
+  }, [router.query.page, fetchPosts]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

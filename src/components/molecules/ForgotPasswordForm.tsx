@@ -42,8 +42,12 @@ export function ForgotPasswordForm() {
         "Email de recuperação enviado! Verifique sua caixa de entrada.",
       );
       reset();
-    } catch (err: any) {
-      setError(err.message || "Erro ao enviar email de recuperação");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Erro ao enviar email de recuperação";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

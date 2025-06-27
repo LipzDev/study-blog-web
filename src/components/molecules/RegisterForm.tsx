@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/atoms/Card";
-import { Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 export function RegisterForm() {
@@ -43,8 +43,10 @@ export function RegisterForm() {
         "Conta criada com sucesso! Verifique seu email para confirmar a conta.",
       );
       reset();
-    } catch (err: any) {
-      setError(err.message || "Erro ao criar conta");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro ao criar conta";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -29,9 +29,9 @@ export default function PostPage() {
       setLoading(true);
       const postData = await apiService.getPostBySlug(postSlug);
       setPost(postData);
-    } catch (err: any) {
+    } catch (error: unknown) {
       setError("Postagem não encontrada");
-      console.error("Erro ao carregar postagem:", err);
+      console.error("Erro ao carregar postagem:", error);
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ export default function PostPage() {
     try {
       await apiService.deletePost(post.id);
       router.push("/posts");
-    } catch (err: any) {
+    } catch (error: unknown) {
       alert("Erro ao excluir postagem");
     }
   };

@@ -47,16 +47,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("token", response.access_token);
       localStorage.setItem("user", JSON.stringify(response.user));
       setUser(response.user);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || "Erro ao fazer login");
+    } catch (error: unknown) {
+      let errorMessage = "Erro ao fazer login";
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as any;
+        if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        } else if (axiosError.response?.status === 401) {
+          errorMessage = "Credenciais inválidas";
+        } else if (axiosError.message) {
+          errorMessage = axiosError.message;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      throw new Error(errorMessage);
     }
   };
 
   const register = async (name: string, email: string, password: string) => {
     try {
       await apiService.register({ name, email, password });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || "Erro ao registrar");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao registrar";
+      throw new Error(errorMessage);
     }
   };
 
@@ -69,30 +86,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const forgotPassword = async (email: string) => {
     try {
       await apiService.forgotPassword({ email });
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "Erro ao enviar email de recuperação",
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erro ao enviar email de recuperação";
+      throw new Error(errorMessage);
     }
   };
 
   const resetPassword = async (token: string, password: string) => {
     try {
       await apiService.resetPassword({ token, password });
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "Erro ao redefinir senha",
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao redefinir senha";
+      throw new Error(errorMessage);
     }
   };
 
   const resendVerification = async (email: string) => {
     try {
       await apiService.resendVerification(email);
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "Erro ao reenviar verificação",
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao reenviar verificação";
+      throw new Error(errorMessage);
     }
   };
 
@@ -100,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await apiService.checkVerificationStatus(email);
       return response.verified || false;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.warn("Erro ao verificar status:", error);
       return false;
     }
@@ -109,10 +128,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const verifyEmail = async (token: string) => {
     try {
       await apiService.verifyEmail(token);
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "Erro ao verificar email",
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao verificar email";
+      throw new Error(errorMessage);
     }
   };
 

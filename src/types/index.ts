@@ -89,6 +89,7 @@ export interface ApiResponse<T = any> {
   message?: string;
   error?: string;
   statusCode?: number;
+  verified?: boolean;
 }
 
 export interface UploadResponse {

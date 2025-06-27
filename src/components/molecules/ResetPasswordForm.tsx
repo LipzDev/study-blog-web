@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/hooks/useAuth";
 import { resetPasswordSchema, ResetPasswordFormData } from "@/utils/schemas";
 import { Button } from "@/components/atoms/Button";
-import { Input } from "@/components/atoms/Input";
 import { PasswordInput } from "@/components/atoms/PasswordInput";
 import {
   Card,
@@ -18,7 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 export function ResetPasswordForm() {
-  const { resetPassword, checkVerificationStatus } = useAuth();
+  const { resetPassword } = useAuth();
   const router = useRouter();
   const { token } = router.query;
 
@@ -27,7 +26,6 @@ export function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingVerification, setIsCheckingVerification] = useState(true);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   const {
     register,
@@ -76,8 +74,10 @@ export function ResetPasswordForm() {
       setTimeout(() => {
         router.push("/login");
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || "Erro ao redefinir senha");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro ao redefinir senha";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

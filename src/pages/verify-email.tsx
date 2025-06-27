@@ -21,22 +21,24 @@ export default function VerifyEmailPage() {
   );
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    if (token && typeof token === "string") {
-      handleVerification();
-    }
-  }, [token]);
-
   const handleVerification = async () => {
     try {
       await verifyEmail(token as string);
       setStatus("success");
       setMessage("Email verificado com sucesso! Você já pode fazer login.");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao verificar email";
       setStatus("error");
-      setMessage(error.message || "Erro ao verificar email");
+      setMessage(errorMessage);
     }
   };
+
+  useEffect(() => {
+    if (token && typeof token === "string") {
+      handleVerification();
+    }
+  }, [token, handleVerification]);
 
   if (!token) {
     return (
