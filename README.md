@@ -96,18 +96,6 @@ _Estou estudando e desenvolvendo este projeto como forma de aprendizado. O backe
 - **Axios** - Comunicação com API
 - **Lucide React** - Ícones bonitos
 
-## 📁 Estrutura do projeto
-
-```
-src/
-├── components/     # Componentes reutilizáveis
-├── pages/         # Páginas da aplicação
-├── services/      # Comunicação com API
-├── hooks/         # Hooks personalizados
-├── types/         # Tipos TypeScript
-└── utils/         # Funções auxiliares
-```
-
 ## 🎯 Próximos passos
 
 Estamos trabalhando em:
@@ -117,19 +105,6 @@ Estamos trabalhando em:
 - Modo escuro
 - Dashboard personalizado
 - Sistema de tags
-
-## 🤝 Contribuindo
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/legal`)
-3. Commit suas mudanças (`git commit -m 'Adiciona algo legal'`)
-4. Push para a branch (`git push origin feature/legal`)
-5. Abra um Pull Request
-
-## 📞 Precisa de ajuda?
-
-- Abra uma [Issue](../../issues) no GitHub
-- Entre em contato com a equipe
 
 ---
 
