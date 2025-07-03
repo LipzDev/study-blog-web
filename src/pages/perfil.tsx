@@ -17,6 +17,8 @@ import {
   AlertCircle,
   ArrowLeft,
 } from "lucide-react";
+import { ProtectedRoute } from "@/components/atoms/ProtectedRoute";
+import { UserRole } from "@/types";
 
 const socialIcons = {
   github: Github,
@@ -26,6 +28,16 @@ const socialIcons = {
 };
 
 export default function Perfil() {
+  return (
+    <ProtectedRoute
+      requiredRoles={[UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN]}
+    >
+      <PerfilContent />
+    </ProtectedRoute>
+  );
+}
+
+function PerfilContent() {
   const { user, updateUser } = useAuth();
   const [name, setName] = useState(user?.name || "");
   const [bio, setBio] = useState(user?.bio || "");

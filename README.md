@@ -1,116 +1,136 @@
-# StudyBlog Frontend
+# 📚 StudyBlog
 
-Frontend moderno para o StudyBlog, desenvolvido com Next.js 12, TypeScript, Tailwind CSS e React Hook Form.
+Uma plataforma moderna para compartilhar conhecimento e experiências de estudo. Desenvolvida com Next.js, TypeScript e Tailwind CSS, oferece uma experiência completa para criar, gerenciar e consumir conteúdo educacional, ainda em criação...
 
-## 🚀 Tecnologias
+## ⚠️ Status do Projeto
 
-- **Next.js 12** - Framework React
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Framework CSS utilitário
-- **React Hook Form** - Gerenciamento de formulários
-- **Zod** - Validação de schemas
-- **Axios** - Cliente HTTP
-- **Lucide React** - Ícones
-- **Atomic Design** - Metodologia de organização de componentes
+**Este projeto está em fase de desenvolvimento e aprendizado!**
 
-## 📁 Estrutura do Projeto
+- 🎓 **Frontend**: Em desenvolvimento ativo
+- 🔧 **Backend**: Também sendo criado durante meus estudos
+- ⏳ **Tempo estimado**: Pode demorar um pouco até conseguir criar um backend totalmente funcional
+- 📚 **Objetivo**: Aprender e praticar desenvolvimento full-stack
 
-```
-src/
-├── components/
-│   ├── atoms/          # Componentes básicos (Button, Input, etc.)
-│   ├── molecules/      # Componentes compostos (LoginForm, PostCard, etc.)
-│   ├── organisms/      # Componentes complexos (Header, Footer, etc.)
-│   └── templates/      # Layouts (Layout principal)
-├── hooks/              # Hooks personalizados (useAuth)
-├── pages/              # Páginas da aplicação
-├── services/           # Serviços de API
-├── types/              # Definições de tipos TypeScript
-├── utils/              # Utilitários (schemas, helpers)
-└── styles/             # Estilos globais
-```
+_Estou estudando e desenvolvendo este projeto como forma de aprendizado. O backend está sendo criado paralelamente, então algumas funcionalidades podem não estar totalmente operacionais ainda._
 
-## 🛠️ Instalação
+## 🚀 Como começar
 
-1. Clone o repositório
-2. Instale as dependências:
+### Pré-requisitos
+
+- Node.js 16+
+- Backend API rodando (verifique se está em `http://localhost:3001`)
+
+### Instalação rápida
+
+1. **Clone e entre no projeto**
+
+   ```bash
+   git clone <url-do-repositorio>
+   cd study-blog-web
+   ```
+
+2. **Instale as dependências**
+
    ```bash
    yarn install
+   # ou
+   npm install
    ```
 
-3. Configure as variáveis de ambiente:
-   Crie um arquivo `.env.local` na raiz do projeto:
-   ```
+3. **Configure o ambiente**
+
+   Crie um arquivo `.env.local` na raiz:
+
+   ```env
    NEXT_PUBLIC_API_URL=http://localhost:3001
    ```
 
-4. Execute o servidor de desenvolvimento:
+4. **Rode o projeto**
+
    ```bash
    yarn dev
+   # ou
+   npm run dev
    ```
 
-5. Acesse [http://localhost:3001](http://localhost:3001)
+5. **Acesse** [http://localhost:3000](http://localhost:3000) 🎉
 
-## 📋 Funcionalidades
+## ✨ O que você pode fazer
 
-### 🔐 Autenticação
-- Login com email e senha
-- Registro de nova conta
-- Recuperação de senha
-- Verificação de email
-- Redefinição de senha
+### 🔐 **Conta e Acesso**
 
-### 📝 Postagens
-- Visualização de postagens recentes na página inicial
-- Listagem completa com paginação
-- Busca e filtros por data
-- Visualização individual de postagens
-- Criação, edição e exclusão (para usuários autorizados)
+- Crie sua conta e verifique seu email
+- Faça login com email e senha
+- Recupere sua senha se esquecer
+- Gerencie seu perfil com foto e bio
+- Adicione links das suas redes sociais
 
-### 👥 Usuários
-- Sistema de roles (USER, ADMIN, SUPER_ADMIN)
-- Controle de acesso baseado em permissões
-- Perfil do usuário
+### 📝 **Conteúdo**
 
-### 🎨 Interface
-- Design responsivo e moderno
-- Componentes reutilizáveis
-- Animações e transições suaves
-- Acessibilidade
+- Veja posts recentes na página inicial
+- Explore todos os posts com busca e filtros
+- Leia posts completos com imagens
+- Crie e edite posts (se for admin)
+- Faça upload de imagens para seus posts
 
-## 🔧 Configuração da API
+### 👥 **Gestão (para admins)**
 
-O frontend se conecta com a API backend através do serviço `apiService`. Certifique-se de que:
+- Painel completo de gerenciamento de usuários
+- Promova usuários para admin
+- Busque usuários por nome ou email
+- Gerencie permissões e exclua contas
 
-1. A API está rodando na URL configurada em `NEXT_PUBLIC_API_URL`
-2. As rotas da API estão funcionando corretamente
-3. O CORS está configurado adequadamente
+### 🎨 **Interface**
 
-## 📱 Responsividade
+- Design responsivo que funciona em qualquer dispositivo
+- Componentes modernos e intuitivos
+- Feedback visual para todas as ações
+- Navegação simples e clara
 
-O projeto é totalmente responsivo e funciona em:
-- Desktop (1024px+)
-- Tablet (768px - 1023px)
-- Mobile (até 767px)
+## 🛠️ Tecnologias
 
-## 🎯 Próximos Passos
+- **Next.js 12** - Framework React
+- **TypeScript** - Tipagem segura
+- **Tailwind CSS** - Estilização moderna
+- **React Hook Form** - Formulários eficientes
+- **Axios** - Comunicação com API
+- **Lucide React** - Ícones bonitos
 
-- [ ] Implementar dashboard do usuário
-- [ ] Adicionar sistema de comentários
-- [ ] Implementar upload de imagens
-- [ ] Adicionar notificações em tempo real
-- [ ] Implementar sistema de tags/categorias
-- [ ] Adicionar busca avançada
-- [ ] Implementar modo escuro
+## 📁 Estrutura do projeto
 
-## 🤝 Contribuição
+```
+src/
+├── components/     # Componentes reutilizáveis
+├── pages/         # Páginas da aplicação
+├── services/      # Comunicação com API
+├── hooks/         # Hooks personalizados
+├── types/         # Tipos TypeScript
+└── utils/         # Funções auxiliares
+```
+
+## 🎯 Próximos passos
+
+Estamos trabalhando em:
+
+- Sistema de comentários
+- Notificações em tempo real
+- Modo escuro
+- Dashboard personalizado
+- Sistema de tags
+
+## 🤝 Contribuindo
 
 1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
+2. Crie uma branch para sua feature (`git checkout -b feature/legal`)
+3. Commit suas mudanças (`git commit -m 'Adiciona algo legal'`)
+4. Push para a branch (`git push origin feature/legal`)
 5. Abra um Pull Request
 
-## 📄 Licença
+## 📞 Precisa de ajuda?
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+- Abra uma [Issue](../../issues) no GitHub
+- Entre em contato com a equipe
+
+---
+
+**StudyBlog** - Transformando a forma como compartilhamos conhecimento! 📚✨
