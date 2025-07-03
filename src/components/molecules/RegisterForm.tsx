@@ -62,7 +62,7 @@ export function RegisterForm() {
           <p className="mt-2 text-sm text-gray-600">
             Ou{" "}
             <Link
-              href="/login"
+              href="/auth/login"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               entre na sua conta existente

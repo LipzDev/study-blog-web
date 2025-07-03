@@ -44,7 +44,7 @@ export function Header() {
             </Link>
             {isAdmin && (
               <Link
-                href="/gerenciar"
+                href="/user/gerenciar"
                 className="text-gray-700 hover:text-blue-600 transition-colors"
               >
                 Gerenciar
@@ -57,7 +57,7 @@ export function Header() {
             {user ? (
               <div className="flex items-center space-x-4">
                 <Link
-                  href="/perfil"
+                  href="/user/perfil"
                   className="flex items-center space-x-2 group focus:outline-none focus:ring-2 focus:ring-blue-500 rounded transition"
                 >
                   <Avatar
@@ -82,12 +82,12 @@ export function Header() {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link href="/login">
+                <Link href="/auth/login">
                   <Button variant="ghost" size="sm">
                     Entrar
                   </Button>
                 </Link>
-                <Link href="/register">
+                <Link href="/auth/register">
                   <Button variant="primary" size="sm">
                     Cadastrar
                   </Button>
@@ -132,7 +132,7 @@ export function Header() {
               </Link>
               {isAdmin && (
                 <Link
-                  href="/gerenciar"
+                  href="/user/gerenciar"
                   className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -143,7 +143,7 @@ export function Header() {
               {user ? (
                 <div className="px-3 py-2">
                   <Link
-                    href="/perfil"
+                    href="/user/perfil"
                     className="flex items-center space-x-2 mb-2 group focus:outline-none focus:ring-2 focus:ring-blue-500 rounded transition"
                   >
                     <Avatar
@@ -171,12 +171,15 @@ export function Header() {
                 </div>
               ) : (
                 <div className="px-3 py-2 space-y-2">
-                  <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                  <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
                     <Button variant="ghost" size="sm" className="w-full">
                       Entrar
                     </Button>
                   </Link>
-                  <Link href="/register" onClick={() => setIsMenuOpen(false)}>
+                  <Link
+                    href="/auth/register"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     <Button variant="primary" size="sm" className="w-full">
                       Cadastrar
                     </Button>
