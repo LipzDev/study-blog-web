@@ -21,7 +21,7 @@ export function ProtectedRoute({
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/login");
+      router.push("/auth/login");
     } else if (
       !loading &&
       user &&

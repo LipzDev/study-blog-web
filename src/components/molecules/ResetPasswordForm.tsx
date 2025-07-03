@@ -72,7 +72,7 @@ export function ResetPasswordForm() {
         "Senha redefinida com sucesso! Redirecionando para o login...",
       );
       setTimeout(() => {
-        router.push("/login");
+        router.push("/auth/login");
       }, 2000);
     } catch (err: unknown) {
       const errorMessage =
@@ -97,7 +97,7 @@ export function ResetPasswordForm() {
                 <p className="text-sm text-gray-600 mb-4">
                   O link de redefinição de senha é inválido ou expirou.
                 </p>
-                <Link href="/forgot-password">
+                <Link href="/auth/forgot-password">
                   <Button variant="primary">Solicitar novo link</Button>
                 </Link>
               </div>
@@ -142,12 +142,12 @@ export function ResetPasswordForm() {
                   Você precisa verificar seu email antes de alterar sua senha.
                 </p>
                 <div className="space-y-2">
-                  <Link href="/login">
+                  <Link href="/auth/login">
                     <Button variant="primary" className="w-full">
                       Voltar para o login
                     </Button>
                   </Link>
-                  <Link href="/forgot-password">
+                  <Link href="/auth/forgot-password">
                     <Button variant="outline" className="w-full">
                       Solicitar novo link
                     </Button>
@@ -219,7 +219,7 @@ export function ResetPasswordForm() {
 
               <div className="text-center">
                 <Link
-                  href="/login"
+                  href="/auth/login"
                   className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
                 >
                   <ArrowLeft className="h-4 w-4 mr-1" />

@@ -65,7 +65,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/login"
+                  href="/auth/login"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Entrar
@@ -73,7 +73,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/register"
+                  href="/auth/register"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Cadastrar

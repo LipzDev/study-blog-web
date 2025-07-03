@@ -159,7 +159,7 @@ export function LoginForm() {
           <p className="mt-2 text-sm text-gray-600">
             Ou{" "}
             <Link
-              href="/register"
+              href="/auth/register"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               crie uma nova conta
@@ -222,7 +222,7 @@ export function LoginForm() {
 
               <div className="flex items-center justify-between">
                 <Link
-                  href="/forgot-password"
+                  href="/auth/forgot-password"
                   className="text-sm text-blue-600 hover:text-blue-500"
                 >
                   Esqueceu sua senha?

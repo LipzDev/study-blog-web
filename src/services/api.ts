@@ -41,11 +41,11 @@ class ApiService {
         // Só redirecionar se não estivermos na página de login
         if (
           error.response?.status === 401 &&
-          window.location.pathname !== "/login"
+          window.location.pathname !== "/auth/login"
         ) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
-          window.location.href = "/login";
+          window.location.href = "/auth/login";
         }
         return Promise.reject(error);
       },

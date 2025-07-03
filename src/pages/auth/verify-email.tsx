@@ -54,7 +54,7 @@ export default function VerifyEmailPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   O link de verificação é inválido ou expirou.
                 </p>
-                <Link href="/login">
+                <Link href="/auth/login">
                   <Button variant="primary">Voltar para o login</Button>
                 </Link>
               </div>
@@ -92,7 +92,7 @@ export default function VerifyEmailPage() {
                   <p className="text-sm text-gray-600 mb-4">{message}</p>
                   <div className="text-center">
                     <Link
-                      href="/login"
+                      href="/auth/login"
                       className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
                     >
                       <ArrowLeft className="h-4 w-4 mr-1" />
@@ -110,12 +110,12 @@ export default function VerifyEmailPage() {
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">{message}</p>
                   <div className="space-y-2">
-                    <Link href="/login">
+                    <Link href="/auth/login">
                       <Button variant="primary" className="w-full">
                         Voltar para o login
                       </Button>
                     </Link>
-                    <Link href="/register">
+                    <Link href="/auth/register">
                       <Button variant="outline" className="w-full">
                         Criar nova conta
                       </Button>

@@ -80,7 +80,7 @@ export default function HomePage() {
                 </Link>
               )}
               {!user && (
-                <Link href="/register">
+                <Link href="/auth/register">
                   <Button
                     size="lg"
                     variant="outline"
