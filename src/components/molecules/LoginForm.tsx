@@ -38,7 +38,6 @@ export function LoginForm() {
 
   const email = watch("email");
 
-  // Atualizar email atual quando mudar
   useEffect(() => {
     if (email) {
       setCurrentEmail(email);
@@ -51,7 +50,6 @@ export function LoginForm() {
     try {
       setIsResending(true);
       await resendVerification(currentEmail);
-      // Não mostrar mensagem de sucesso, apenas silenciosamente reenviar
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Erro ao reenviar verificação";
@@ -67,11 +65,9 @@ export function LoginForm() {
       setError(null);
       setShowResendButton(false);
 
-      // PRIMEIRA TENTATIVA: Tentar fazer login diretamente
       await login(data.email, data.password);
       router.push("/");
     } catch (err: unknown) {
-      // Extrair a mensagem de erro correta do erro HTTP
       let errorMessage = "Erro ao fazer login";
 
       if (err && typeof err === "object" && "response" in err) {
@@ -87,42 +83,42 @@ export function LoginForm() {
         errorMessage = err.message;
       }
 
-      // Verificar se o erro é específico sobre email não verificado
       if (
         errorMessage.toLowerCase().includes("verificar") ||
         errorMessage.toLowerCase().includes("verificado") ||
         errorMessage.toLowerCase().includes("confirme")
       ) {
         try {
-          // Verificar se o email realmente existe e não está verificado
           const isVerified = await checkVerificationStatus(data.email);
 
           if (!isVerified) {
-            // Email existe mas não está verificado
             setShowResendButton(true);
             setCurrentEmail(data.email);
             setError("Verifique seu email antes de fazer login");
             return;
           }
         } catch (verificationError: unknown) {
-          // Se houver erro na verificação, provavelmente o email não existe
           console.warn("Erro ao verificar status:", verificationError);
         }
       }
 
-      // Verificar se o erro é específico sobre email não existir (não credenciais inválidas)
-      const isEmailNotFound =
-        errorMessage.toLowerCase().includes("não encontrado") ||
-        errorMessage.toLowerCase().includes("nao encontrado") ||
-        errorMessage.toLowerCase().includes("não existe") ||
-        errorMessage.toLowerCase().includes("nao existe") ||
-        errorMessage.toLowerCase().includes("user not found") ||
-        errorMessage.toLowerCase().includes("usuário não encontrado") ||
-        errorMessage.toLowerCase().includes("usuario nao encontrado") ||
-        errorMessage.toLowerCase().includes("email não encontrado") ||
-        errorMessage.toLowerCase().includes("email nao encontrado");
+      const normalizedError = errorMessage
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
 
-      // Se o erro indica especificamente que o email não existe
+      const emailNotFoundPatterns = [
+        "nao encontrado",
+        "nao existe",
+        "user not found",
+        "usuario nao encontrado",
+        "email nao encontrado",
+      ];
+
+      const isEmailNotFound = emailNotFoundPatterns.some((pattern) =>
+        normalizedError.includes(pattern),
+      );
+
       if (isEmailNotFound) {
         setError(
           `O email "${data.email}" não está cadastrado em nossa plataforma. Verifique se digitou corretamente ou crie uma nova conta.`,
@@ -130,8 +126,6 @@ export function LoginForm() {
         return;
       }
 
-      // Se chegou aqui, é um erro de login normal (senha incorreta, credenciais inválidas, etc.)
-      // Para erros 401 ou credenciais inválidas, mostrar mensagem genérica de segurança
       if (
         errorMessage.toLowerCase().includes("credenciais") ||
         errorMessage.toLowerCase().includes("invalid") ||
