@@ -16,6 +16,9 @@ import {
   Loader2,
   AlertCircle,
   ArrowLeft,
+  X,
+  Plus,
+  Edit2,
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/atoms/ProtectedRoute";
 import { UserRole } from "@/types";
@@ -55,6 +58,12 @@ function PerfilContent() {
     twitter: user?.twitter || "",
     instagram: user?.instagram || "",
   });
+  const [editingSocial, setEditingSocial] = useState({
+    github: false,
+    linkedin: false,
+    twitter: false,
+    instagram: false,
+  });
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -88,6 +97,14 @@ function PerfilContent() {
       };
       setSocial(socialData);
       setOriginalSocial(socialData);
+
+      // Resetar estado de edição
+      setEditingSocial({
+        github: false,
+        linkedin: false,
+        twitter: false,
+        instagram: false,
+      });
     }
   }, [user]);
 
@@ -211,6 +228,14 @@ function PerfilContent() {
         twitter: social.twitter,
         instagram: social.instagram,
       });
+
+      // Fechar campos de edição
+      setEditingSocial({
+        github: false,
+        linkedin: false,
+        twitter: false,
+        instagram: false,
+      });
     } catch (err: any) {
       setError(
         err.response?.data?.message || "Erro ao fazer upload do avatar.",
@@ -222,6 +247,47 @@ function PerfilContent() {
 
   const handleSocialChange = (key: string, value: string) => {
     setSocial((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleAddSocial = (key: string) => {
+    setEditingSocial((prev) => ({ ...prev, [key]: true }));
+  };
+
+  const handleCancelSocial = (key: string) => {
+    setEditingSocial((prev) => ({ ...prev, [key]: false }));
+    setSocial((prev) => ({
+      ...prev,
+      [key]: originalSocial[key as keyof typeof originalSocial],
+    }));
+  };
+
+  const handleRemoveSocial = async (key: string) => {
+    setLoading(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      const updateData = {
+        name,
+        bio,
+        github: key === "github" ? "" : social.github,
+        linkedin: key === "linkedin" ? "" : social.linkedin,
+        twitter: key === "twitter" ? "" : social.twitter,
+        instagram: key === "instagram" ? "" : social.instagram,
+      };
+
+      const result = await apiService.updateProfile(updateData);
+      updateUser(result.user);
+
+      // Atualizar estados locais
+      setSocial((prev) => ({ ...prev, [key]: "" }));
+      setOriginalSocial((prev) => ({ ...prev, [key]: "" }));
+      setSuccess("Rede social removida com sucesso!");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Erro ao remover rede social.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -267,6 +333,14 @@ function PerfilContent() {
         linkedin: result.user.linkedin || "",
         twitter: result.user.twitter || "",
         instagram: result.user.instagram || "",
+      });
+
+      // Fechar campos de edição
+      setEditingSocial({
+        github: false,
+        linkedin: false,
+        twitter: false,
+        instagram: false,
       });
     } catch (err: any) {
       setError(err.response?.data?.message || "Erro ao atualizar perfil.");
@@ -365,33 +439,108 @@ function PerfilContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {Object.entries(social).map(([key, value]) => {
               const Icon = socialIcons[key as keyof typeof socialIcons];
-              const hasOriginalData = !canBeEmpty(key);
+              const isEditing =
+                editingSocial[key as keyof typeof editingSocial];
+              const hasSavedValue =
+                originalSocial[key as keyof typeof originalSocial].trim() !==
+                "";
               const isInvalid = value.trim() !== "" && !isValidUrl(value);
+              const socialName = key.charAt(0).toUpperCase() + key.slice(1);
 
               return (
                 <div key={key} className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Icon className="h-5 w-5 text-gray-500" />
-                    <input
-                      type="url"
-                      placeholder={`Link do ${key.charAt(0).toUpperCase() + key.slice(1)}`}
-                      value={value}
-                      onChange={(e) => handleSocialChange(key, e.target.value)}
-                      className={`border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        isInvalid
-                          ? "border-red-300 focus:ring-red-500"
-                          : "border-gray-200"
-                      }`}
-                    />
-                  </div>
-                  {hasOriginalData && (
-                    <p className="text-xs text-amber-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      Campo obrigatório (já possui dados)
-                    </p>
-                  )}
-                  {isInvalid && (
-                    <p className="text-xs text-red-600">URL inválida</p>
+                  {!isEditing && hasSavedValue ? (
+                    // Mostrar rede social salva
+                    <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-5 w-5 text-blue-600" />
+                        <a
+                          href={
+                            originalSocial[key as keyof typeof originalSocial]
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                        >
+                          {socialName}
+                        </a>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleAddSocial(key)}
+                          className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSocial(key)}
+                          className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded transition-colors"
+                          title="Remover"
+                          disabled={loading}
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : !isEditing && !hasSavedValue ? (
+                    // Mostrar botão para adicionar rede social
+                    <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-5 w-5 text-gray-500" />
+                        <span className="text-gray-600">{socialName}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleAddSocial(key)}
+                        className="flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span className="text-sm">Adicionar</span>
+                      </button>
+                    </div>
+                  ) : (
+                    // Mostrar campo de edição
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-5 w-5 text-gray-500" />
+                        <input
+                          type="url"
+                          placeholder={`Link do ${socialName}`}
+                          value={value}
+                          onChange={(e) =>
+                            handleSocialChange(key, e.target.value)
+                          }
+                          className={`border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            isInvalid
+                              ? "border-red-300 focus:ring-red-500"
+                              : "border-gray-200"
+                          }`}
+                          autoFocus
+                        />
+                      </div>
+                      {isInvalid && (
+                        <p className="text-xs text-red-600">URL inválida</p>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleCancelSocial(key)}
+                          className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isInvalid || loading}
+                          className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {loading ? "Salvando..." : "Salvar"}
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               );
