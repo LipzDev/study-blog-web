@@ -17,7 +17,7 @@ import { apiService } from "@/services/api";
 import { AlertCircle, ArrowLeft, Send, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { ProtectedRoute } from "@/components/atoms/ProtectedRoute";
+import { AxiosError } from "axios";
 
 function CreatePostPage() {
   const router = useRouter();
@@ -125,13 +125,13 @@ function CreatePostPage() {
       let errorMessage = "Erro ao criar postagem";
 
       if (err && typeof err === "object" && "response" in err) {
-        const axiosError = err as any;
-        if (axiosError.response?.data?.message) {
-          errorMessage = axiosError.response.data.message;
-        } else if (axiosError.response?.status === 409) {
+        const axiosError = err as AxiosError;
+        if (axiosError.response && (axiosError.response.data as any)?.message) {
+          errorMessage = (axiosError.response.data as any).message;
+        } else if (axiosError.response && axiosError.response.status === 409) {
           errorMessage =
             "Já existe uma postagem com este slug. Tente alterar o título ou slug.";
-        } else if (axiosError.response?.status === 401) {
+        } else if (axiosError.response && axiosError.response.status === 401) {
           errorMessage = "Você não tem permissão para criar postagens";
         }
       } else if (err instanceof Error) {
@@ -145,8 +145,7 @@ function CreatePostPage() {
   };
 
   // Verificar se o usuário tem permissão para criar posts
-  const canCreatePost =
-    user && (user.role === "admin" || user.role === "super_admin");
+  const canCreatePost = !!user;
 
   if (!canCreatePost) {
     return (
@@ -339,10 +338,4 @@ function CreatePostPage() {
   );
 }
 
-export default function CreatePost() {
-  return (
-    <ProtectedRoute>
-      <CreatePostPage />
-    </ProtectedRoute>
-  );
-}
+export default CreatePostPage;

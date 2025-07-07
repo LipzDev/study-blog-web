@@ -56,7 +56,7 @@ export function PostCard({ post }: PostCardProps) {
           {getImageUrl() && (
             <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
               <Image
-                src={getImageUrl()}
+                src={getImageUrl() || ""}
                 alt={post.title}
                 fill
                 className="object-cover"

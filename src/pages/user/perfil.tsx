@@ -19,6 +19,8 @@ import {
   X,
   Plus,
   Edit2,
+  Crown,
+  Shield,
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/atoms/ProtectedRoute";
 import { UserRole } from "@/types";
@@ -349,6 +351,27 @@ function PerfilContent() {
     }
   };
 
+  // Função para exibir o badge de cargo com ícone
+  const getRoleBadge = (role: string) => {
+    if (role === UserRole.SUPER_ADMIN)
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300 ml-2">
+          <Crown className="h-3 w-3 mr-1 text-yellow-600" /> Super Admin
+        </span>
+      );
+    if (role === UserRole.ADMIN)
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300 ml-2">
+          <Shield className="h-3 w-3 mr-1 text-blue-600" /> Admin
+        </span>
+      );
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-300 ml-2">
+        <UserIcon className="h-3 w-3 mr-1 text-gray-600" /> Usuário
+      </span>
+    );
+  };
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
       {/* Back Button */}
@@ -360,8 +383,11 @@ function PerfilContent() {
           </Button>
         </Link>
       </div>
+      <div className="mb-8 flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-gray-900">Meu Perfil</h1>
+        {user && getRoleBadge(user.role)}
+      </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Meu Perfil</h1>
       <form
         onSubmit={handleSave}
         className="bg-white rounded-xl shadow p-6 space-y-6 border border-gray-100"

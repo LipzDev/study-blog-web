@@ -67,9 +67,10 @@ export default function PostPage() {
     });
   };
 
-  const getCreatedAt = () => post.createdAt || post.date;
+  const getCreatedAt = () => (post ? post.createdAt : "");
 
   const getImageUrl = () => {
+    if (!post) return null;
     if (post.image) {
       if (post.image.startsWith("http")) return post.image;
       return `http://localhost:3001${post.image.startsWith("/") ? post.image : "/" + post.image}`;
@@ -117,9 +118,14 @@ export default function PostPage() {
 
   const canEdit =
     user &&
-    (user.id === post.authorId ||
-      user.role === "admin" ||
-      user.role === "super_admin");
+    // Super admin pode tudo
+    (user.role === "super_admin" ||
+      // Admin pode editar posts de user e admin, mas não de super_admin
+      (user.role === "admin" &&
+        post.author &&
+        post.author.role !== "super_admin") ||
+      // User só pode editar o próprio post
+      (user.role === "user" && user.id === post.authorId));
   const canDelete =
     user &&
     (user.id === post.authorId ||
@@ -142,14 +148,14 @@ export default function PostPage() {
         {/* Post Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {post.title}
+            {post?.title}
           </h1>
 
           <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
                 <User className="h-4 w-4" />
-                <span>{post.author.name}</span>
+                <span>{post?.author?.name}</span>
               </div>
 
               <div className="flex items-center space-x-1">
@@ -164,7 +170,7 @@ export default function PostPage() {
             </div>
 
             {/* Action Buttons */}
-            {canEdit && (
+            {canEdit && post && (
               <div className="flex items-center space-x-2">
                 <Link href={`/posts/${post.slug}/edit`}>
                   <Button variant="outline" size="sm">
@@ -184,10 +190,10 @@ export default function PostPage() {
         </div>
 
         {/* Post Image */}
-        {getImageUrl() && (
+        {getImageUrl() && post && (
           <div className="relative h-96 w-full overflow-hidden rounded-lg mb-8">
             <Image
-              src={getImageUrl()}
+              src={getImageUrl() || ""}
               alt={post.title}
               fill
               className="object-cover"
@@ -199,7 +205,7 @@ export default function PostPage() {
         {/* Post Content */}
         <div className="prose prose-lg max-w-none">
           <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-            {post.text}
+            {post?.text}
           </div>
         </div>
 
@@ -209,9 +215,11 @@ export default function PostPage() {
             <div>
               <p>
                 Postado por{" "}
-                <span className="font-medium">{post.author.name}</span>
+                <span className="font-medium">{post?.author?.name}</span>
               </p>
-              <p>Última atualização: {formatDate(post.updatedAt)}</p>
+              <p>
+                Última atualização: {post ? formatDate(post.updatedAt) : ""}
+              </p>
             </div>
           </div>
         </div>

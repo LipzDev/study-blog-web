@@ -17,6 +17,7 @@ export default function HomePage() {
 
   const isAdmin =
     user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN;
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -67,7 +68,7 @@ export default function HomePage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              {isAdmin && (
+              {isLoggedIn && (
                 <Link href="/posts/create">
                   <Button
                     size="lg"
