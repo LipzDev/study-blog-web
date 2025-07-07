@@ -4,7 +4,16 @@ import { Layout } from "@/components/templates/Layout";
 import { Button } from "@/components/atoms/Button";
 import { Post } from "@/types";
 import { apiService } from "@/services/api";
-import { Calendar, User, Clock, ArrowLeft, Edit, Trash2 } from "lucide-react";
+import {
+  Calendar,
+  User,
+  Clock,
+  ArrowLeft,
+  Edit,
+  Trash2,
+  AlertTriangle,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +26,9 @@ export default function PostPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (slug && typeof slug === "string") {
@@ -38,15 +50,17 @@ export default function PostPage() {
   };
 
   const handleDelete = async () => {
-    if (!post || !confirm("Tem certeza que deseja excluir esta postagem?")) {
-      return;
-    }
-
+    if (!post) return;
+    setDeleteLoading(true);
+    setDeleteError(null);
     try {
       await apiService.deletePost(post.id);
       router.push("/posts");
     } catch (error: unknown) {
-      alert("Erro ao excluir postagem");
+      setDeleteError("Erro ao excluir postagem");
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -179,7 +193,11 @@ export default function PostPage() {
                   </Button>
                 </Link>
                 {canDelete && (
-                  <Button variant="danger" size="sm" onClick={handleDelete}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setShowDeleteModal(true)}
+                  >
                     <Trash2 className="h-4 w-4 mr-1" />
                     Excluir
                   </Button>
@@ -223,6 +241,98 @@ export default function PostPage() {
             </div>
           </div>
         </div>
+
+        {/* Modal de Exclusão de Post */}
+        {showDeleteModal && post && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
+              <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                      <Trash2 className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        Excluir Postagem
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Remover permanentemente da plataforma
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label="Fechar"
+                  >
+                    <X className="text-2xl leading-none" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="mb-6">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-red-800 mb-1">
+                          Ação Irreversível
+                        </h4>
+                        <p className="text-sm text-red-700">
+                          Esta ação não pode ser desfeita. A postagem será
+                          permanentemente removida da plataforma.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-2">
+                      Postagem a ser excluída:
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="font-medium">Título:</span>{" "}
+                        {post.title}
+                      </div>
+                      <div>
+                        <span className="font-medium">Autor:</span>{" "}
+                        {post.author?.name}
+                      </div>
+                      <div>
+                        <span className="font-medium">Data de criação:</span>{" "}
+                        {formatDate(getCreatedAt())}
+                      </div>
+                    </div>
+                  </div>
+                  {deleteError && (
+                    <div className="mt-4 text-sm text-red-600">
+                      {deleteError}
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteModal(false)}
+                    className="flex-1"
+                    disabled={deleteLoading}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleDelete}
+                    loading={deleteLoading}
+                    disabled={deleteLoading}
+                    className="flex-1 bg-red-600 hover:bg-red-700"
+                  >
+                    Excluir
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
