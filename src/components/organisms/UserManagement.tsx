@@ -24,6 +24,7 @@ import {
   X,
   ChevronDown,
   ChevronUp,
+  MoreVertical,
 } from "lucide-react";
 
 export function UserManagement() {
@@ -676,41 +677,83 @@ export function UserManagement() {
                             <div className="flex items-center gap-2">
                               {/* Não mostrar ações para o próprio usuário */}
                               {user.id !== currentUser?.id && (
-                                <>
-                                  {canPromoteUser(user) && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => openPromoteModal(user)}
-                                      className="text-blue-600 border-blue-300 hover:bg-blue-50"
-                                    >
-                                      <Shield className="h-3 w-3 mr-1" />
-                                      Promover
-                                    </Button>
+                                <div className="relative">
+                                  <button
+                                    type="button"
+                                    className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    onClick={() =>
+                                      setExpandedCards((prev) => {
+                                        const newSet = new Set(prev);
+                                        if (newSet.has(user.id))
+                                          newSet.delete(user.id);
+                                        else newSet.add(user.id);
+                                        return newSet;
+                                      })
+                                    }
+                                    aria-haspopup="menu"
+                                    aria-expanded={expandedCards.has(user.id)}
+                                    aria-label="Ações"
+                                  >
+                                    <MoreVertical className="h-5 w-5" />
+                                  </button>
+                                  {expandedCards.has(user.id) && (
+                                    <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 animate-fade-in">
+                                      <ul className="py-1 text-sm text-gray-700">
+                                        {canPromoteUser(user) && (
+                                          <li>
+                                            <button
+                                              className="w-full text-left px-4 py-2 hover:bg-blue-50"
+                                              onClick={() => {
+                                                openPromoteModal(user);
+                                                setExpandedCards((prev) => {
+                                                  const newSet = new Set(prev);
+                                                  newSet.delete(user.id);
+                                                  return newSet;
+                                                });
+                                              }}
+                                            >
+                                              Promover
+                                            </button>
+                                          </li>
+                                        )}
+                                        {canDemoteUser(user) && (
+                                          <li>
+                                            <button
+                                              className="w-full text-left px-4 py-2 hover:bg-orange-50"
+                                              onClick={() => {
+                                                openDemoteModal(user);
+                                                setExpandedCards((prev) => {
+                                                  const newSet = new Set(prev);
+                                                  newSet.delete(user.id);
+                                                  return newSet;
+                                                });
+                                              }}
+                                            >
+                                              Remover Admin
+                                            </button>
+                                          </li>
+                                        )}
+                                        {canDeleteUser(user) && (
+                                          <li>
+                                            <button
+                                              className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600"
+                                              onClick={() => {
+                                                openDeleteModal(user);
+                                                setExpandedCards((prev) => {
+                                                  const newSet = new Set(prev);
+                                                  newSet.delete(user.id);
+                                                  return newSet;
+                                                });
+                                              }}
+                                            >
+                                              Excluir
+                                            </button>
+                                          </li>
+                                        )}
+                                      </ul>
+                                    </div>
                                   )}
-                                  {canDemoteUser(user) && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => openDemoteModal(user)}
-                                      className="text-orange-600 border-orange-300 hover:bg-orange-50"
-                                    >
-                                      <UserIcon className="h-3 w-3 mr-1" />
-                                      Remover Admin
-                                    </Button>
-                                  )}
-                                  {canDeleteUser(user) && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => openDeleteModal(user)}
-                                      className="text-red-600 border-red-300 hover:bg-red-50"
-                                    >
-                                      <Trash2 className="h-3 w-3 mr-1" />
-                                      Excluir
-                                    </Button>
-                                  )}
-                                </>
+                                </div>
                               )}
                             </div>
                           </td>
