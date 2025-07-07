@@ -138,13 +138,6 @@ function PerfilContent() {
     Object.entries(social).forEach(([key, value]) => {
       const trimmedValue = value.trim();
 
-      // Se o campo está vazio mas tinha dados originais
-      if (trimmedValue === "" && !canBeEmpty(key)) {
-        errors.push(
-          `${key.charAt(0).toUpperCase() + key.slice(1)} não pode ser removido se já possui dados. Deixe o campo inalterado ou forneça uma URL válida.`,
-        );
-      }
-
       // Se o campo tem valor, deve ser uma URL válida
       if (trimmedValue !== "" && !isValidUrl(trimmedValue)) {
         errors.push(

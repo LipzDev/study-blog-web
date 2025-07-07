@@ -69,12 +69,14 @@ export default function PostsPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const page = Number(router.query.page) || 1;
     fetchPosts(page);
-  }, [router.query.page, fetchPosts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.query.page]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
