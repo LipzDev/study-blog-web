@@ -11,11 +11,15 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import { useRouter } from "next/router";
+import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 
 export default function PostsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +29,8 @@ export default function PostsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
 
   const fetchPosts = useCallback(
     async (page: number = 1) => {
@@ -92,11 +98,27 @@ export default function PostsPage() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Postagens</h1>
-          <p className="text-gray-600">
-            Explore as postagens da nossa comunidade de estudantes
-          </p>
+        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2 md:mb-0">
+              Postagens
+            </h1>
+            <p className="text-gray-600">
+              Explore as postagens da nossa comunidade de estudantes
+            </p>
+          </div>
+          {isAdmin && (
+            <Link href="/posts/create">
+              <Button
+                size="lg"
+                variant="primary"
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Criar Postagem
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Search and Filters */}

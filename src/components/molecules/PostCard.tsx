@@ -32,14 +32,31 @@ export function PostCard({ post }: PostCardProps) {
     return text.substring(0, maxLength) + "...";
   };
 
+  const getCreatedAt = () => post.createdAt || (post as any).date;
+
+  // Monta a URL da imagem se vier apenas imagePath
+  const getImageUrl = () => {
+    if (post.image) {
+      if (post.image.startsWith("http")) return post.image;
+      return `http://localhost:3001${post.image.startsWith("/") ? post.image : "/" + post.image}`;
+    }
+    if (post.imagePath) {
+      const path = post.imagePath.startsWith("/")
+        ? post.imagePath
+        : `/${post.imagePath}`;
+      return `http://localhost:3001${path}`;
+    }
+    return null;
+  };
+
   return (
     <Card className="h-full hover:shadow-lg transition-shadow duration-300">
       <Link href={`/posts/${post.slug}`}>
         <div className="cursor-pointer">
-          {post.image && (
+          {getImageUrl() && (
             <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
               <Image
-                src={post.image}
+                src={getImageUrl()}
                 alt={post.title}
                 fill
                 className="object-cover"
@@ -68,12 +85,12 @@ export function PostCard({ post }: PostCardProps) {
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4" />
-                  <span>{formatDate(post.createdAt)}</span>
+                  <span>{formatDate(getCreatedAt())}</span>
                 </div>
 
                 <div className="flex items-center space-x-1">
                   <Clock className="h-4 w-4" />
-                  <span>{formatTime(post.createdAt)}</span>
+                  <span>{formatTime(getCreatedAt())}</span>
                 </div>
               </div>
             </div>

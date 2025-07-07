@@ -67,6 +67,22 @@ export default function PostPage() {
     });
   };
 
+  const getCreatedAt = () => post.createdAt || post.date;
+
+  const getImageUrl = () => {
+    if (post.image) {
+      if (post.image.startsWith("http")) return post.image;
+      return `http://localhost:3001${post.image.startsWith("/") ? post.image : "/" + post.image}`;
+    }
+    if (post.imagePath) {
+      const path = post.imagePath.startsWith("/")
+        ? post.imagePath
+        : `/${post.imagePath}`;
+      return `http://localhost:3001${path}`;
+    }
+    return null;
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -138,12 +154,12 @@ export default function PostPage() {
 
               <div className="flex items-center space-x-1">
                 <Calendar className="h-4 w-4" />
-                <span>{formatDate(post.createdAt)}</span>
+                <span>{formatDate(getCreatedAt())}</span>
               </div>
 
               <div className="flex items-center space-x-1">
                 <Clock className="h-4 w-4" />
-                <span>{formatTime(post.createdAt)}</span>
+                <span>{formatTime(getCreatedAt())}</span>
               </div>
             </div>
 
@@ -168,10 +184,10 @@ export default function PostPage() {
         </div>
 
         {/* Post Image */}
-        {post.image && (
+        {getImageUrl() && (
           <div className="relative h-96 w-full overflow-hidden rounded-lg mb-8">
             <Image
-              src={post.image}
+              src={getImageUrl()}
               alt={post.title}
               fill
               className="object-cover"

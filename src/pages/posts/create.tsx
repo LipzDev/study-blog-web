@@ -97,13 +97,13 @@ function CreatePostPage() {
       setIsLoading(true);
       setError(null);
 
-      let imagePath = "";
+      let image = "";
 
       // Upload da imagem se houver
       if (imageFile) {
         try {
           const uploadResponse = await apiService.uploadImage(imageFile);
-          imagePath = uploadResponse.url;
+          image = uploadResponse.url;
         } catch (uploadError) {
           console.error("Erro ao fazer upload da imagem:", uploadError);
           setError("Erro ao fazer upload da imagem. Tente novamente.");
@@ -114,7 +114,7 @@ function CreatePostPage() {
       // Criar o post
       const postData = {
         ...data,
-        imagePath: imagePath || undefined,
+        image: image || undefined,
       };
 
       const newPost = await apiService.createPost(postData);
