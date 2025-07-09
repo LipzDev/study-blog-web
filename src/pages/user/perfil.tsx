@@ -637,16 +637,8 @@ function PerfilContent() {
                               const updateData = {
                                 name,
                                 bio,
-                                github:
-                                  key === "github" ? value : social.github,
-                                linkedin:
-                                  key === "linkedin" ? value : social.linkedin,
-                                twitter:
-                                  key === "twitter" ? value : social.twitter,
-                                instagram:
-                                  key === "instagram"
-                                    ? value
-                                    : social.instagram,
+                                ...social,
+                                [key]: value,
                               };
                               const result =
                                 await apiService.updateProfile(updateData);
