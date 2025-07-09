@@ -508,7 +508,9 @@ export function UserManagement() {
                                 {/* Verificar se é o próprio usuário */}
                                 {user.id === currentUser?.id && (
                                   <p className="text-xs text-gray-600">
-                                    Este usuário não pode ser gerenciado.
+                                    {isSuperAdmin
+                                      ? "Este usuário não pode ser gerenciado."
+                                      : "Você não pode gerenciar sua própria conta."}
                                   </p>
                                 )}
 
