@@ -70,6 +70,22 @@ function PerfilContent() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  // Adicionar um estado para controlar se o usuário tentou salvar
+  const [triedSubmit, setTriedSubmit] = useState(false);
+  const [socialErrors, setSocialErrors] = useState({
+    github: "",
+    linkedin: "",
+    twitter: "",
+    instagram: "",
+  });
+
+  // Mensagem de sucesso some automaticamente após 3 segundos
+  useEffect(() => {
+    if (success) {
+      const timeout = setTimeout(() => setSuccess(""), 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [success]);
 
   // Função para obter a URL completa do avatar
   const getAvatarUrl = (avatarPath: string | null) => {
@@ -126,6 +142,11 @@ function PerfilContent() {
     }
   };
 
+  function isValidSocialUrl(url: string) {
+    if (!url) return true; // Campo opcional
+    return /^(https?:\/\/|www\.)/.test(url);
+  }
+
   // Função para validar todos os campos antes de salvar
   const validateForm = () => {
     const errors: string[] = [];
@@ -137,8 +158,14 @@ function PerfilContent() {
     // Validar redes sociais
     Object.entries(social).forEach(([key, value]) => {
       const trimmedValue = value.trim();
-
-      // Se o campo tem valor, deve ser uma URL válida
+      if (
+        editingSocial[key as keyof typeof editingSocial] &&
+        trimmedValue === ""
+      ) {
+        errors.push(
+          `${key.charAt(0).toUpperCase() + key.slice(1)} não pode ser vazio.`,
+        );
+      }
       if (trimmedValue !== "" && !isValidUrl(trimmedValue)) {
         errors.push(
           `${key.charAt(0).toUpperCase() + key.slice(1)} deve ser uma URL válida.`,
@@ -242,6 +269,8 @@ function PerfilContent() {
 
   const handleSocialChange = (key: string, value: string) => {
     setSocial((prev) => ({ ...prev, [key]: value }));
+    setSocialErrors((prev) => ({ ...prev, [key]: "" })); // Limpa erro ao digitar
+    setTriedSubmit(false);
   };
 
   const handleAddSocial = (key: string) => {
@@ -254,6 +283,7 @@ function PerfilContent() {
       ...prev,
       [key]: originalSocial[key as keyof typeof originalSocial],
     }));
+    setSocialErrors((prev) => ({ ...prev, [key]: "" })); // Limpa erro ao cancelar
   };
 
   const handleRemoveSocial = async (key: string) => {
@@ -262,13 +292,14 @@ function PerfilContent() {
     setError("");
 
     try {
+      // Enviar PATCH para remover o campo (setar como null)
       const updateData = {
         name,
         bio,
-        github: key === "github" ? "" : social.github,
-        linkedin: key === "linkedin" ? "" : social.linkedin,
-        twitter: key === "twitter" ? "" : social.twitter,
-        instagram: key === "instagram" ? "" : social.instagram,
+        github: key === "github" ? null : social.github,
+        linkedin: key === "linkedin" ? null : social.linkedin,
+        twitter: key === "twitter" ? null : social.twitter,
+        instagram: key === "instagram" ? null : social.instagram,
       };
 
       const result = await apiService.updateProfile(updateData);
@@ -277,6 +308,8 @@ function PerfilContent() {
       // Atualizar estados locais
       setSocial((prev) => ({ ...prev, [key]: "" }));
       setOriginalSocial((prev) => ({ ...prev, [key]: "" }));
+      setEditingSocial((prev) => ({ ...prev, [key]: false }));
+      setSocialErrors((prev) => ({ ...prev, [key]: "" })); // Limpa erro ao remover
       setSuccess("Rede social removida com sucesso!");
     } catch (err: any) {
       setError(err.response?.data?.message || "Erro ao remover rede social.");
@@ -287,11 +320,39 @@ function PerfilContent() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTriedSubmit(true);
     setLoading(true);
     setSuccess("");
     setError("");
 
-    // Validar formulário
+    // Validação dos campos sociais
+    const newErrors: typeof socialErrors = { ...socialErrors };
+    let hasError = false;
+    Object.entries(social).forEach(([key, value]) => {
+      if (
+        editingSocial[key as keyof typeof editingSocial] &&
+        value.trim() === ""
+      ) {
+        newErrors[key as keyof typeof newErrors] =
+          "O campo não pode ser vazio.";
+        hasError = true;
+      } else if (
+        editingSocial[key as keyof typeof editingSocial] &&
+        value.trim() &&
+        !isValidSocialUrl(value.trim())
+      ) {
+        newErrors[key as keyof typeof newErrors] =
+          "Insira uma URL válida (http://, https:// ou www).";
+        hasError = true;
+      }
+    });
+    setSocialErrors(newErrors);
+    if (hasError) {
+      setLoading(false);
+      return;
+    }
+
+    // Validar formulário geral
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
       setError(validationErrors.join("\n"));
@@ -303,12 +364,9 @@ function PerfilContent() {
       // Primeiro, fazer upload do avatar se houver um novo
       if (avatarFile) {
         await handleUploadAvatar();
-        // Não continuar com updateProfile se o upload foi bem-sucedido
-        // O upload já atualiza o usuário e o avatar
         setLoading(false);
         return;
       }
-
       // Se não há novo avatar, apenas atualizar o perfil
       const result = await apiService.updateProfile({
         name,
@@ -318,19 +376,14 @@ function PerfilContent() {
         twitter: social.twitter,
         instagram: social.instagram,
       });
-
       updateUser(result.user);
       setSuccess("Perfil atualizado com sucesso!");
-
-      // Atualizar dados originais após sucesso
       setOriginalSocial({
         github: result.user.github || "",
         linkedin: result.user.linkedin || "",
         twitter: result.user.twitter || "",
         instagram: result.user.instagram || "",
       });
-
-      // Fechar campos de edição
       setEditingSocial({
         github: false,
         linkedin: false,
@@ -514,7 +567,7 @@ function PerfilContent() {
                       <button
                         type="button"
                         onClick={() => handleAddSocial(key)}
-                        className="flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                        className="flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-blue-800 rounded transition-colors"
                       >
                         <Plus className="h-4 w-4" />
                         <span className="text-sm">Adicionar</span>
@@ -525,24 +578,28 @@ function PerfilContent() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Icon className="h-5 w-5 text-gray-500" />
-                        <input
-                          type="url"
-                          placeholder={`Link do ${socialName}`}
-                          value={value}
-                          onChange={(e) =>
-                            handleSocialChange(key, e.target.value)
-                          }
-                          className={`border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            isInvalid
-                              ? "border-red-300 focus:ring-red-500"
-                              : "border-gray-200"
-                          }`}
-                          autoFocus
-                        />
+                        <div className="flex-1">
+                          <input
+                            type="url"
+                            placeholder={`Link do ${socialName}`}
+                            value={value}
+                            onChange={(e) =>
+                              handleSocialChange(key, e.target.value)
+                            }
+                            className={`border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 ${
+                              socialErrors[key as keyof typeof socialErrors]
+                                ? "border-red-300 focus:ring-red-500"
+                                : "border-gray-200 focus:ring-blue-500"
+                            }`}
+                            autoFocus
+                          />
+                          {socialErrors[key as keyof typeof socialErrors] && (
+                            <p className="text-xs text-red-600 mt-1 w-full text-left">
+                              {socialErrors[key as keyof typeof socialErrors]}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      {isInvalid && (
-                        <p className="text-xs text-red-600">URL inválida</p>
-                      )}
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
@@ -552,8 +609,70 @@ function PerfilContent() {
                           Cancelar
                         </button>
                         <button
-                          type="submit"
-                          disabled={isInvalid || loading}
+                          type="button"
+                          disabled={isInvalid || value.trim() === "" || loading}
+                          onClick={async () => {
+                            // Salvar individualmente o campo social
+                            setLoading(true);
+                            setSuccess("");
+                            setError("");
+                            if (value.trim() === "") {
+                              setSocialErrors((prev) => ({
+                                ...prev,
+                                [key]: "O campo não pode ser vazio.",
+                              }));
+                              setLoading(false);
+                              return;
+                            }
+                            if (!isValidSocialUrl(value.trim())) {
+                              setSocialErrors((prev) => ({
+                                ...prev,
+                                [key]:
+                                  "Insira uma URL válida (http://, https:// ou www).",
+                              }));
+                              setLoading(false);
+                              return;
+                            }
+                            try {
+                              const updateData = {
+                                name,
+                                bio,
+                                github:
+                                  key === "github" ? value : social.github,
+                                linkedin:
+                                  key === "linkedin" ? value : social.linkedin,
+                                twitter:
+                                  key === "twitter" ? value : social.twitter,
+                                instagram:
+                                  key === "instagram"
+                                    ? value
+                                    : social.instagram,
+                              };
+                              const result =
+                                await apiService.updateProfile(updateData);
+                              updateUser(result.user);
+                              setOriginalSocial((prev) => ({
+                                ...prev,
+                                [key]: value,
+                              }));
+                              setEditingSocial((prev) => ({
+                                ...prev,
+                                [key]: false,
+                              }));
+                              setSocialErrors((prev) => ({
+                                ...prev,
+                                [key]: "",
+                              })); // Limpa erro ao salvar
+                              setSuccess("Rede social atualizada com sucesso!");
+                            } catch (err: any) {
+                              setError(
+                                err.response?.data?.message ||
+                                  "Erro ao atualizar rede social.",
+                              );
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
                           className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {loading ? "Salvando..." : "Salvar"}

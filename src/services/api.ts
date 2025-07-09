@@ -116,10 +116,10 @@ class ApiService {
   async updateProfile(data: {
     name?: string;
     bio?: string;
-    github?: string;
-    linkedin?: string;
-    twitter?: string;
-    instagram?: string;
+    github?: string | null;
+    linkedin?: string | null;
+    twitter?: string | null;
+    instagram?: string | null;
   }): Promise<{ message: string; user: User }> {
     const response: AxiosResponse<{ message: string; user: User }> =
       await this.api.patch("/auth/profile", data);
