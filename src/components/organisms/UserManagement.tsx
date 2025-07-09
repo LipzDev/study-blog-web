@@ -53,6 +53,11 @@ export function UserManagement() {
   const [currentSearchPage, setCurrentSearchPage] = useState(1);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
+  // Novo estado para o menu de ações da tabela
+  const [openActionMenuUserId, setOpenActionMenuUserId] = useState<
+    string | null
+  >(null);
+
   // Estados dos modais
   const [showPromoteModal, setShowPromoteModal] = useState(false);
   const [showDemoteModal, setShowDemoteModal] = useState(false);
@@ -388,7 +393,7 @@ export function UserManagement() {
           {searchResults && (
             <div className="mt-6 space-y-4">
               {/* Header do resultado */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border border-gray-200 rounded-xl">
+              {/* <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border border-gray-200 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -415,7 +420,7 @@ export function UserManagement() {
                     </div>
                   )}
                 </div>
-              </div>
+              </div> */}
 
               {/* Cards dos usuários */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -503,90 +508,191 @@ export function UserManagement() {
                                 {/* Verificar se é o próprio usuário */}
                                 {user.id === currentUser?.id && (
                                   <p className="text-xs text-gray-600">
-                                    Você não pode manipular sua própria conta.
+                                    Este usuário não pode ser gerenciado.
                                   </p>
                                 )}
 
-                                {/* Verificar se é super admin */}
-                                {user.role === UserRole?.SUPER_ADMIN &&
-                                  user.id !== currentUser?.id && (
-                                    <p className="text-xs text-gray-600">
-                                      Não é possivel modificar o cargo ou
-                                      excluir um super admin.
-                                    </p>
-                                  )}
-
-                                {/* Ações disponíveis apenas se não for o próprio usuário */}
+                                {/* Lógica detalhada para super admin e admin */}
                                 {user.id !== currentUser?.id && (
-                                  <div className="flex flex-row gap-2">
+                                  <>
+                                    {/* SUPER ADMIN */}
                                     {isSuperAdmin && (
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => openPromoteModal(user)}
-                                        className="bg-white hover:bg-blue-50 text-blue-600 border-blue-300 hover:border-blue-400 shadow-sm text-xs"
-                                        disabled={!canPromoteUser(user)}
-                                        style={
-                                          !canPromoteUser(user)
-                                            ? {
+                                      <>
+                                        {user.role === UserRole.SUPER_ADMIN && (
+                                          <p className="text-xs text-gray-600">
+                                            Este usuário não pode ser
+                                            gerenciado.
+                                          </p>
+                                        )}
+                                        {user.role === UserRole.ADMIN && (
+                                          <div className="flex flex-row gap-2">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() =>
+                                                openDemoteModal(user)
+                                              }
+                                              className="bg-white hover:bg-orange-50 text-orange-600 border-orange-300 hover:border-orange-400 shadow-sm text-xs"
+                                              disabled={!canDemoteUser(user)}
+                                              style={
+                                                !canDemoteUser(user)
+                                                  ? {
+                                                      opacity: 0.5,
+                                                      pointerEvents: "none",
+                                                    }
+                                                  : {}
+                                              }
+                                            >
+                                              <UserIcon className="h-3 w-3 mr-1" />
+                                              Remover Admin
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() =>
+                                                openDeleteModal(user)
+                                              }
+                                              className="bg-white hover:bg-red-50 text-red-600 border-red-300 hover:border-red-400 shadow-sm text-xs"
+                                              disabled={!canDeleteUser(user)}
+                                              style={
+                                                !canDeleteUser(user)
+                                                  ? {
+                                                      opacity: 0.5,
+                                                      pointerEvents: "none",
+                                                    }
+                                                  : {}
+                                              }
+                                            >
+                                              <Trash2 className="h-3 w-3 mr-1" />
+                                              Excluir Usuário
+                                            </Button>
+                                          </div>
+                                        )}
+                                        {user.role === UserRole.USER && (
+                                          <div className="flex flex-row gap-2">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() =>
+                                                openPromoteModal(user)
+                                              }
+                                              className="bg-white hover:bg-blue-50 text-blue-600 border-blue-300 hover:border-blue-400 shadow-sm text-xs"
+                                              disabled={!canPromoteUser(user)}
+                                              style={
+                                                !canPromoteUser(user)
+                                                  ? {
+                                                      opacity: 0.5,
+                                                      pointerEvents: "none",
+                                                    }
+                                                  : {}
+                                              }
+                                            >
+                                              <Shield className="h-3 w-3 mr-1" />
+                                              Promover a Admin
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() =>
+                                                openDeleteModal(user)
+                                              }
+                                              className="bg-white hover:bg-red-50 text-red-600 border-red-300 hover:border-red-400 shadow-sm text-xs"
+                                              disabled={!canDeleteUser(user)}
+                                              style={
+                                                !canDeleteUser(user)
+                                                  ? {
+                                                      opacity: 0.5,
+                                                      pointerEvents: "none",
+                                                    }
+                                                  : {}
+                                              }
+                                            >
+                                              <Trash2 className="h-3 w-3 mr-1" />
+                                              Excluir Usuário
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </>
+                                    )}
+                                    {/* ADMIN (não super admin) */}
+                                    {!isSuperAdmin && isAdmin && (
+                                      <>
+                                        {user.role === UserRole.SUPER_ADMIN && (
+                                          <p className="text-xs text-gray-600">
+                                            Este usuário não pode ser
+                                            gerenciado.
+                                          </p>
+                                        )}
+                                        {user.role === UserRole.ADMIN && (
+                                          <div className="flex flex-row gap-2">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() =>
+                                                openDemoteModal(user)
+                                              }
+                                              className="bg-white hover:bg-orange-50 text-orange-600 border-orange-300 hover:border-orange-400 shadow-sm text-xs"
+                                              disabled
+                                              style={{
                                                 opacity: 0.5,
                                                 pointerEvents: "none",
+                                              }}
+                                            >
+                                              <UserIcon className="h-3 w-3 mr-1" />
+                                              Remover Admin
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() =>
+                                                openDeleteModal(user)
                                               }
-                                            : {}
-                                        }
-                                      >
-                                        <Shield className="h-3 w-3 mr-1" />
-                                        Promover a Admin
-                                      </Button>
+                                              className="bg-white hover:bg-red-50 text-red-600 border-red-300 hover:border-red-400 shadow-sm text-xs"
+                                              disabled
+                                              style={{
+                                                opacity: 0.5,
+                                                pointerEvents: "none",
+                                              }}
+                                            >
+                                              <Trash2 className="h-3 w-3 mr-1" />
+                                              Excluir Usuário
+                                            </Button>
+                                          </div>
+                                        )}
+                                        {user.role === UserRole.USER && (
+                                          <div className="flex flex-row gap-2">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() =>
+                                                openPromoteModal(user)
+                                              }
+                                              className="bg-white hover:bg-blue-50 text-blue-600 border-blue-300 hover:border-blue-400 shadow-sm text-xs"
+                                              disabled
+                                              style={{
+                                                opacity: 0.5,
+                                                pointerEvents: "none",
+                                              }}
+                                            >
+                                              <Shield className="h-3 w-3 mr-1" />
+                                              Promover a Admin
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() =>
+                                                openDeleteModal(user)
+                                              }
+                                              className="bg-white hover:bg-red-50 text-red-600 border-red-300 hover:border-red-400 shadow-sm text-xs"
+                                            >
+                                              <Trash2 className="h-3 w-3 mr-1" />
+                                              Excluir Usuário
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </>
                                     )}
-                                    {isSuperAdmin &&
-                                      user.role === UserRole.ADMIN && (
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() => openDemoteModal(user)}
-                                          className="bg-white hover:bg-orange-50 text-orange-600 border-orange-300 hover:border-orange-400 shadow-sm text-xs"
-                                          disabled={!canDemoteUser(user)}
-                                          style={
-                                            !canDemoteUser(user)
-                                              ? {
-                                                  opacity: 0.5,
-                                                  pointerEvents: "none",
-                                                }
-                                              : {}
-                                          }
-                                        >
-                                          <UserIcon className="h-3 w-3 mr-1" />
-                                          Remover Admin
-                                        </Button>
-                                      )}
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => openDeleteModal(user)}
-                                      className="bg-white hover:bg-red-50 text-red-600 border-red-300 hover:border-red-400 shadow-sm text-xs"
-                                      disabled={
-                                        !canDeleteUser(user) &&
-                                        isAdmin &&
-                                        !isSuperAdmin &&
-                                        user.role !== UserRole.USER
-                                      }
-                                      style={
-                                        !canDeleteUser(user) &&
-                                        isAdmin &&
-                                        !isSuperAdmin &&
-                                        user.role !== UserRole.USER
-                                          ? {
-                                              opacity: 0.5,
-                                              pointerEvents: "none",
-                                            }
-                                          : {}
-                                      }
-                                    >
-                                      <Trash2 className="h-3 w-3 mr-1" />
-                                      Excluir Usuário
-                                    </Button>
-                                  </div>
+                                  </>
                                 )}
                               </div>
                             </div>
@@ -709,149 +815,273 @@ export function UserManagement() {
                         {isAdmin && (
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">
-                              {/* Não mostrar ações para o próprio usuário */}
-                              {user.id !== currentUser?.id && (
+                              {user.role ===
+                              UserRole.SUPER_ADMIN ? null : user.id !==
+                                currentUser?.id ? (
                                 <div className="relative">
                                   <button
                                     type="button"
                                     className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
                                     onClick={() =>
-                                      setExpandedCards((prev) => {
-                                        const newSet = new Set(prev);
-                                        if (newSet.has(user.id))
-                                          newSet.delete(user.id);
-                                        else newSet.add(user.id);
-                                        return newSet;
-                                      })
+                                      setOpenActionMenuUserId(user.id)
                                     }
                                     aria-haspopup="menu"
-                                    aria-expanded={expandedCards.has(user.id)}
+                                    aria-expanded={
+                                      openActionMenuUserId === user.id
+                                    }
                                     aria-label="Ações"
+                                    disabled={
+                                      !isSuperAdmin &&
+                                      isAdmin &&
+                                      user.role === UserRole.SUPER_ADMIN
+                                    }
+                                    title={
+                                      !isSuperAdmin &&
+                                      isAdmin &&
+                                      user.role === UserRole.SUPER_ADMIN
+                                        ? "Este usuário não pode ser gerenciado."
+                                        : undefined
+                                    }
                                   >
                                     <MoreVertical className="h-5 w-5" />
                                   </button>
-                                  {expandedCards.has(user.id) && (
+                                  {openActionMenuUserId === user.id && (
                                     <>
                                       {/* Backdrop para fechar ao clicar fora */}
                                       <div
                                         className="fixed inset-0 z-10"
                                         onClick={() =>
-                                          setExpandedCards((prev) => {
-                                            const newSet = new Set(prev);
-                                            newSet.delete(user.id);
-                                            return newSet;
-                                          })
+                                          setOpenActionMenuUserId(null)
                                         }
                                       />
                                       <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20 animate-fade-in">
                                         <ul className="py-1 text-sm text-gray-700">
+                                          {/* SUPER ADMIN */}
                                           {isSuperAdmin && (
-                                            <li>
-                                              <button
-                                                className="w-full text-left px-4 py-2 hover:bg-blue-50"
-                                                onClick={() => {
-                                                  if (canPromoteUser(user)) {
-                                                    openPromoteModal(user);
-                                                    setExpandedCards((prev) => {
-                                                      const newSet = new Set(
-                                                        prev,
-                                                      );
-                                                      newSet.delete(user.id);
-                                                      return newSet;
-                                                    });
-                                                  }
-                                                }}
-                                                disabled={!canPromoteUser(user)}
-                                                style={
-                                                  !canPromoteUser(user)
-                                                    ? {
+                                            <>
+                                              {user.role ===
+                                                UserRole.SUPER_ADMIN && (
+                                                <li>
+                                                  <span className="block px-4 py-2 text-gray-600 cursor-not-allowed">
+                                                    Este usuário não pode ser
+                                                    gerenciado.
+                                                  </span>
+                                                </li>
+                                              )}
+                                              {user.role === UserRole.ADMIN && (
+                                                <>
+                                                  <li>
+                                                    <button
+                                                      className="w-full text-left px-4 py-2 hover:bg-orange-50"
+                                                      onClick={() => {
+                                                        if (
+                                                          canDemoteUser(user)
+                                                        ) {
+                                                          openDemoteModal(user);
+                                                          setOpenActionMenuUserId(
+                                                            null,
+                                                          );
+                                                        }
+                                                      }}
+                                                      disabled={
+                                                        !canDemoteUser(user)
+                                                      }
+                                                      style={
+                                                        !canDemoteUser(user)
+                                                          ? {
+                                                              opacity: 0.5,
+                                                              pointerEvents:
+                                                                "none",
+                                                            }
+                                                          : {}
+                                                      }
+                                                    >
+                                                      Remover Admin
+                                                    </button>
+                                                  </li>
+                                                  <li>
+                                                    <button
+                                                      className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600"
+                                                      onClick={() => {
+                                                        if (
+                                                          canDeleteUser(user)
+                                                        ) {
+                                                          openDeleteModal(user);
+                                                          setOpenActionMenuUserId(
+                                                            null,
+                                                          );
+                                                        }
+                                                      }}
+                                                      disabled={
+                                                        !canDeleteUser(user)
+                                                      }
+                                                      style={
+                                                        !canDeleteUser(user)
+                                                          ? {
+                                                              opacity: 0.5,
+                                                              pointerEvents:
+                                                                "none",
+                                                            }
+                                                          : {}
+                                                      }
+                                                    >
+                                                      Excluir
+                                                    </button>
+                                                  </li>
+                                                </>
+                                              )}
+                                              {user.role === UserRole.USER && (
+                                                <>
+                                                  <li>
+                                                    <button
+                                                      className="w-full text-left px-4 py-2 hover:bg-blue-50"
+                                                      onClick={() => {
+                                                        if (
+                                                          canPromoteUser(user)
+                                                        ) {
+                                                          openPromoteModal(
+                                                            user,
+                                                          );
+                                                          setOpenActionMenuUserId(
+                                                            null,
+                                                          );
+                                                        }
+                                                      }}
+                                                      disabled={
+                                                        !canPromoteUser(user)
+                                                      }
+                                                      style={
+                                                        !canPromoteUser(user)
+                                                          ? {
+                                                              opacity: 0.5,
+                                                              pointerEvents:
+                                                                "none",
+                                                            }
+                                                          : {}
+                                                      }
+                                                    >
+                                                      Promover a Admin
+                                                    </button>
+                                                  </li>
+                                                  <li>
+                                                    <button
+                                                      className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600"
+                                                      onClick={() => {
+                                                        if (
+                                                          canDeleteUser(user)
+                                                        ) {
+                                                          openDeleteModal(user);
+                                                          setOpenActionMenuUserId(
+                                                            null,
+                                                          );
+                                                        }
+                                                      }}
+                                                      disabled={
+                                                        !canDeleteUser(user)
+                                                      }
+                                                      style={
+                                                        !canDeleteUser(user)
+                                                          ? {
+                                                              opacity: 0.5,
+                                                              pointerEvents:
+                                                                "none",
+                                                            }
+                                                          : {}
+                                                      }
+                                                    >
+                                                      Excluir
+                                                    </button>
+                                                  </li>
+                                                </>
+                                              )}
+                                            </>
+                                          )}
+                                          {/* ADMIN (não super admin) */}
+                                          {!isSuperAdmin && isAdmin && (
+                                            <>
+                                              {user.role ===
+                                                UserRole.SUPER_ADMIN && (
+                                                <li>
+                                                  <span className="block px-4 py-2 text-gray-600 cursor-not-allowed">
+                                                    Este usuário não pode ser
+                                                    gerenciado.
+                                                  </span>
+                                                </li>
+                                              )}
+                                              {user.role === UserRole.ADMIN && (
+                                                <>
+                                                  <li>
+                                                    <button
+                                                      className="w-full text-left px-4 py-2 hover:bg-orange-50"
+                                                      disabled
+                                                      style={{
                                                         opacity: 0.5,
                                                         pointerEvents: "none",
-                                                      }
-                                                    : {}
-                                                }
-                                              >
-                                                Promover
-                                              </button>
-                                            </li>
+                                                      }}
+                                                    >
+                                                      Remover Admin
+                                                    </button>
+                                                  </li>
+                                                  <li>
+                                                    <button
+                                                      className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600"
+                                                      disabled
+                                                      style={{
+                                                        opacity: 0.5,
+                                                        pointerEvents: "none",
+                                                      }}
+                                                    >
+                                                      Excluir
+                                                    </button>
+                                                  </li>
+                                                </>
+                                              )}
+                                              {user.role === UserRole.USER && (
+                                                <>
+                                                  <li>
+                                                    <button
+                                                      className="w-full text-left px-4 py-2 hover:bg-blue-50"
+                                                      disabled
+                                                      style={{
+                                                        opacity: 0.5,
+                                                        pointerEvents: "none",
+                                                      }}
+                                                    >
+                                                      Promover a Admin
+                                                    </button>
+                                                  </li>
+                                                  <li>
+                                                    <button
+                                                      className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600"
+                                                      onClick={() => {
+                                                        openDeleteModal(user);
+                                                        setOpenActionMenuUserId(
+                                                          null,
+                                                        );
+                                                      }}
+                                                    >
+                                                      Excluir
+                                                    </button>
+                                                  </li>
+                                                </>
+                                              )}
+                                            </>
                                           )}
-                                          {isSuperAdmin &&
-                                            user.role === UserRole.ADMIN && (
-                                              <li>
-                                                <button
-                                                  className="w-full text-left px-4 py-2 hover:bg-orange-50"
-                                                  onClick={() => {
-                                                    if (canDemoteUser(user)) {
-                                                      openDemoteModal(user);
-                                                      setExpandedCards(
-                                                        (prev) => {
-                                                          const newSet =
-                                                            new Set(prev);
-                                                          newSet.delete(
-                                                            user.id,
-                                                          );
-                                                          return newSet;
-                                                        },
-                                                      );
-                                                    }
-                                                  }}
-                                                  disabled={
-                                                    !canDemoteUser(user)
-                                                  }
-                                                  style={
-                                                    !canDemoteUser(user)
-                                                      ? {
-                                                          opacity: 0.5,
-                                                          pointerEvents: "none",
-                                                        }
-                                                      : {}
-                                                  }
-                                                >
-                                                  Remover Admin
-                                                </button>
-                                              </li>
-                                            )}
-                                          <li>
-                                            <button
-                                              className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600"
-                                              onClick={() => {
-                                                if (canDeleteUser(user)) {
-                                                  openDeleteModal(user);
-                                                  setExpandedCards((prev) => {
-                                                    const newSet = new Set(
-                                                      prev,
-                                                    );
-                                                    newSet.delete(user.id);
-                                                    return newSet;
-                                                  });
-                                                }
-                                              }}
-                                              disabled={
-                                                !canDeleteUser(user) &&
-                                                isAdmin &&
-                                                !isSuperAdmin &&
-                                                user.role !== UserRole.USER
-                                              }
-                                              style={
-                                                !canDeleteUser(user) &&
-                                                isAdmin &&
-                                                !isSuperAdmin &&
-                                                user.role !== UserRole.USER
-                                                  ? {
-                                                      opacity: 0.5,
-                                                      pointerEvents: "none",
-                                                    }
-                                                  : {}
-                                              }
-                                            >
-                                              Excluir
-                                            </button>
-                                          </li>
                                         </ul>
                                       </div>
                                     </>
                                   )}
                                 </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="p-2 rounded-full text-gray-300 cursor-not-allowed"
+                                  disabled
+                                  title="Você não pode gerenciar sua própria conta."
+                                  aria-label="Ações"
+                                >
+                                  <MoreVertical className="h-5 w-5" />
+                                </button>
                               )}
                             </div>
                           </td>
