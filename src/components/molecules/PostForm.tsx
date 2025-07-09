@@ -80,7 +80,7 @@ export const PostForm: React.FC<PostFormProps> = ({
     if (!data) return null;
     if (data.image) {
       if (data.image.startsWith("http")) return data.image;
-      return `http://localhost:3001${data.image.startsWith("/") ? data.image : "/" + data.image}`;
+      return `${process.env.NEXT_PUBLIC_API_URL}${data.image.startsWith("/") ? data.image : "/" + data.image}`;
     }
     // Se quiser tratar imagePath, adicione aqui
     return null;

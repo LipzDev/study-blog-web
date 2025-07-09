@@ -87,13 +87,13 @@ export default function PostPage() {
     if (!post) return null;
     if (post.image) {
       if (post.image.startsWith("http")) return post.image;
-      return `http://localhost:3001${post.image.startsWith("/") ? post.image : "/" + post.image}`;
+      return `${process.env.NEXT_PUBLIC_API_URL}${post.image.startsWith("/") ? post.image : "/" + post.image}`;
     }
     if (post.imagePath) {
       const path = post.imagePath.startsWith("/")
         ? post.imagePath
         : `/${post.imagePath}`;
-      return `http://localhost:3001${path}`;
+      return `${process.env.NEXT_PUBLIC_API_URL}${path}`;
     }
     return null;
   };

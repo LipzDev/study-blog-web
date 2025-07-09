@@ -62,6 +62,7 @@ const EditPostPage = () => {
         ...data,
         image: image || undefined,
       };
+
       await apiService.updatePost(post.id, updateData);
       router.push(`/posts/${post.slug}`);
     } catch (err: unknown) {

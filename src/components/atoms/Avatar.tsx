@@ -30,7 +30,13 @@ export function Avatar({
     }
 
     // Se é uma URL relativa, adiciona a base da API
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiBase) {
+      console.error(
+        "NEXT_PUBLIC_API_URL not set. Cannot construct avatar URL.",
+      );
+      return null;
+    }
     return `${apiBase}${avatarPath}`;
   };
 

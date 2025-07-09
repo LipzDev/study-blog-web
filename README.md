@@ -13,47 +13,29 @@ Uma plataforma moderna para compartilhar conhecimento e experiências de estudo.
 
 _Estou estudando e desenvolvendo este projeto como forma de aprendizado. O backend está sendo criado paralelamente, então algumas funcionalidades podem não estar totalmente operacionais ainda._
 
-## 🚀 Como começar
+## 🌐 Variáveis de Ambiente Importantes
 
-### Pré-requisitos
+Adicione a seguinte variável ao seu arquivo .env.local:
 
-- Node.js 16+
-- Backend API rodando (verifique se está em `http://localhost:3001`)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
 
-### Instalação rápida
+- `NEXT_PUBLIC_API_URL`: URL da API (NestJS)
 
-1. **Clone e entre no projeto**
+Certifique-se de configurar corretamente essa variável para o ambiente de desenvolvimento e produção.
 
-   ```bash
-   git clone <url-do-repositorio>
-   cd study-blog-web
-   ```
+## 🚀 Como Executar
 
-2. **Instale as dependências**
+### Desenvolvimento
 
-   ```bash
-   yarn install
-   # ou
-   npm install
-   ```
+```bash
+npm run dev
+# ou
+yarn dev
+```
 
-3. **Configure o ambiente**
-
-   Crie um arquivo `.env.local` na raiz:
-
-   ```env
-   NEXT_PUBLIC_API_URL=http://localhost:3001
-   ```
-
-4. **Rode o projeto**
-
-   ```bash
-   yarn dev
-   # ou
-   npm run dev
-   ```
-
-5. **Acesse** [http://localhost:3000](http://localhost:3000) 🎉
+> Certifique-se de que a variável NEXT_PUBLIC_API_URL esteja corretamente configurada no seu .env.local antes de iniciar o frontend.
 
 ## ✨ O que você pode fazer
 
