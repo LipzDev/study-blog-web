@@ -157,14 +157,7 @@ class ApiService {
       "/posts/paginated",
       { params },
     );
-    const data = response.data || {};
-    return {
-      posts: data.posts || [],
-      total: data.total || 0,
-      page: data.page || params.page || 1,
-      limit: data.limit || params.limit || 10,
-      totalPages: data.totalPages || 0,
-    };
+    return response.data;
   }
 
   async getPost(id: string): Promise<Post> {
