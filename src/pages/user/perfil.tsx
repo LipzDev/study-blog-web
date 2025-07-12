@@ -1,29 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/atoms/Button";
 import { Avatar } from "@/components/atoms/Avatar";
+import { Button } from "@/components/atoms/Button";
+import { ProtectedRoute } from "@/components/atoms/ProtectedRoute";
+import { useAuth } from "@/hooks/useAuth";
 import { apiService } from "@/services/api";
-import Link from "next/link";
+import { UserRole } from "@/types";
 import {
-  User as UserIcon,
+  ArrowLeft,
   Camera,
   CheckCircle,
-  XCircle,
-  Github,
-  Linkedin,
-  Twitter,
-  Instagram,
-  Loader2,
-  AlertCircle,
-  ArrowLeft,
-  X,
-  Plus,
-  Edit2,
   Crown,
+  Edit2,
+  Github,
+  Instagram,
+  Linkedin,
+  Loader2,
+  Plus,
   Shield,
+  Twitter,
+  User as UserIcon,
+  X,
+  XCircle,
 } from "lucide-react";
-import { ProtectedRoute } from "@/components/atoms/ProtectedRoute";
-import { UserRole } from "@/types";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
 const socialIcons = {
   github: Github,
@@ -97,7 +96,7 @@ function PerfilContent() {
     }
 
     // Se é uma URL relativa, adiciona a base da API
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL;
     return `${apiBase}${avatarPath}`;
   };
 
@@ -397,6 +396,55 @@ function PerfilContent() {
     }
   };
 
+  async function handleSaveSocialField(key: string, value: string) {
+    setLoading(true);
+    setSuccess("");
+    setError("");
+    if (value.trim() === "") {
+      setSocialErrors((prev) => ({
+        ...prev,
+        [key]: "O campo não pode ser vazio.",
+      }));
+      setLoading(false);
+      return;
+    }
+    if (!isValidSocialUrl(value.trim())) {
+      setSocialErrors((prev) => ({
+        ...prev,
+        [key]: "Insira uma URL válida (http://, https:// ou www).",
+      }));
+      setLoading(false);
+      return;
+    }
+    try {
+      const updateData = {
+        name,
+        bio,
+        ...social,
+        [key]: value,
+      };
+      const result = await apiService.updateProfile(updateData);
+      updateUser(result.user);
+      setOriginalSocial((prev) => ({
+        ...prev,
+        [key]: value,
+      }));
+      setEditingSocial((prev) => ({
+        ...prev,
+        [key]: false,
+      }));
+      setSocialErrors((prev) => ({
+        ...prev,
+        [key]: "",
+      })); // Limpa erro ao salvar
+      setSuccess("Rede social atualizada com sucesso!");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Erro ao atualizar rede social.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // Função para exibir o badge de cargo com ícone
   const getRoleBadge = (role: string) => {
     if (role === UserRole.SUPER_ADMIN)
@@ -611,68 +659,7 @@ function PerfilContent() {
                         <button
                           type="button"
                           disabled={isInvalid || value.trim() === "" || loading}
-                          onClick={async () => {
-                            // Salvar individualmente o campo social
-                            setLoading(true);
-                            setSuccess("");
-                            setError("");
-                            if (value.trim() === "") {
-                              setSocialErrors((prev) => ({
-                                ...prev,
-                                [key]: "O campo não pode ser vazio.",
-                              }));
-                              setLoading(false);
-                              return;
-                            }
-                            if (!isValidSocialUrl(value.trim())) {
-                              setSocialErrors((prev) => ({
-                                ...prev,
-                                [key]:
-                                  "Insira uma URL válida (http://, https:// ou www).",
-                              }));
-                              setLoading(false);
-                              return;
-                            }
-                            try {
-                              const updateData = {
-                                name,
-                                bio,
-                                github:
-                                  key === "github" ? value : social.github,
-                                linkedin:
-                                  key === "linkedin" ? value : social.linkedin,
-                                twitter:
-                                  key === "twitter" ? value : social.twitter,
-                                instagram:
-                                  key === "instagram"
-                                    ? value
-                                    : social.instagram,
-                              };
-                              const result =
-                                await apiService.updateProfile(updateData);
-                              updateUser(result.user);
-                              setOriginalSocial((prev) => ({
-                                ...prev,
-                                [key]: value,
-                              }));
-                              setEditingSocial((prev) => ({
-                                ...prev,
-                                [key]: false,
-                              }));
-                              setSocialErrors((prev) => ({
-                                ...prev,
-                                [key]: "",
-                              })); // Limpa erro ao salvar
-                              setSuccess("Rede social atualizada com sucesso!");
-                            } catch (err: any) {
-                              setError(
-                                err.response?.data?.message ||
-                                  "Erro ao atualizar rede social.",
-                              );
-                            } finally {
-                              setLoading(false);
-                            }
-                          }}
+                          onClick={() => handleSaveSocialField(key, value)}
                           className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {loading ? "Salvando..." : "Salvar"}
