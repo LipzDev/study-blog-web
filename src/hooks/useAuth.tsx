@@ -2,6 +2,21 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { User } from "@/types";
 import { apiService } from "@/services/api";
 
+// Função utilitária para tratar erros da API
+const handleApiError = (error: unknown, defaultMessage: string): string => {
+  if (error && typeof error === "object" && "response" in error) {
+    const axiosError = error as any;
+    if (axiosError.response?.data?.message) {
+      return axiosError.response.data.message;
+    } else if (axiosError.message) {
+      return axiosError.message;
+    }
+  } else if (error instanceof Error) {
+    return error.message;
+  }
+  return defaultMessage;
+};
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -49,19 +64,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("user", JSON.stringify(response.user));
       setUser(response.user);
     } catch (error: unknown) {
-      let errorMessage = "Erro ao fazer login";
+      let errorMessage = handleApiError(error, "Erro ao fazer login");
 
+      // Tratamento específico para erro 401
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as any;
-        if (axiosError.response?.data?.message) {
-          errorMessage = axiosError.response.data.message;
-        } else if (axiosError.response?.status === 401) {
+        if (axiosError.response?.status === 401) {
           errorMessage = "Credenciais inválidas";
-        } else if (axiosError.message) {
-          errorMessage = axiosError.message;
         }
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
       }
 
       throw new Error(errorMessage);
@@ -72,8 +82,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiService.register({ name, email, password });
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Erro ao registrar";
+      let errorMessage = handleApiError(error, "Erro ao registrar");
+
+      // Tratamento específico para erro 409
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as any;
+        if (axiosError.response?.status === 409) {
+          errorMessage = "Usuário com este email já existe";
+        }
+      }
+
       throw new Error(errorMessage);
     }
   };
@@ -88,10 +106,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiService.forgotPassword({ email });
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Erro ao enviar email de recuperação";
+      const errorMessage = handleApiError(
+        error,
+        "Erro ao enviar email de recuperação",
+      );
       throw new Error(errorMessage);
     }
   };
@@ -100,8 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiService.resetPassword({ token, password });
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Erro ao redefinir senha";
+      const errorMessage = handleApiError(error, "Erro ao redefinir senha");
       throw new Error(errorMessage);
     }
   };
@@ -110,8 +127,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiService.resendVerification(email);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Erro ao reenviar verificação";
+      const errorMessage = handleApiError(
+        error,
+        "Erro ao reenviar verificação",
+      );
       throw new Error(errorMessage);
     }
   };
@@ -130,8 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiService.verifyEmail(token);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Erro ao verificar email";
+      const errorMessage = handleApiError(error, "Erro ao verificar email");
       throw new Error(errorMessage);
     }
   };
