@@ -59,7 +59,7 @@ export default function HomePage() {
             <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
               Uma plataforma moderna para compartilhar conhecimento e
               experiências de estudo. Conecte-se com outros estudantes e aprenda
-              juntos.
+              juntos
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/posts">
