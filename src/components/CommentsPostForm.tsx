@@ -1,15 +1,20 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SendHorizontal, SquareX } from "lucide-react";
-import React, { useState } from "react";
+import React, { use, useContext, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import ListComments from "./ListComments";
+import { useAuth } from "@/hooks/useAuth";
+import Image from "next/image";
+import { Avatar } from "./atoms/Avatar";
 
 export interface IComments {
+  id: string;
   name: string;
   text: string;
   likes: [];
+  avatar: string | undefined;
 }
 const createCommentSchema = z.object({
   comment: z.string().trim().min(3),
@@ -17,6 +22,7 @@ const createCommentSchema = z.object({
 type CreateCommentSchema = z.infer<typeof createCommentSchema>;
 
 const CommentsPostForm = () => {
+  const { user } = useAuth();
   const { register, handleSubmit, watch, resetField } =
     useForm<CreateCommentSchema>({
       resolver: zodResolver(createCommentSchema),
@@ -24,15 +30,20 @@ const CommentsPostForm = () => {
         comment: "",
       },
     });
+
   const [comments, setComments] = useState<IComments[]>([]);
   const checkLenghtInput = () => {
     return watch("comment").trim().length < 5;
   };
   const handleSubmitClick: SubmitHandler<CreateCommentSchema> = (data) => {
+    if (!user) return;
+
     setComments((prevState) => [
       {
-        name: "Maria Silva",
+        id: user.id,
+        name: user.name,
         text: data.comment,
+        avatar: user.avatar,
         likes: [],
       },
       ...prevState,
@@ -42,7 +53,15 @@ const CommentsPostForm = () => {
   return (
     <div className="mt-1">
       <div className="flex w-full gap-3 p-3">
-        <div className="w-[45px] h-[40px] sm:w-[65px] sm:h-[60px] mt-2 bg-neutral-300 rounded-full"></div>
+        <div className="w-fit mt-3">
+          <Avatar
+            alt={`Avatar do ${user?.name}`}
+            name={user?.name}
+            src={user?.avatar}
+            size="lg"
+          />
+        </div>
+
         <div className="mt-3 h-[210px] p-2 w-full border rounded-md">
           <form onSubmit={handleSubmit(handleSubmitClick)}>
             <textarea

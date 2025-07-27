@@ -1,13 +1,20 @@
 import React from "react";
 import { IComments } from "./CommentsPostForm";
 import { Heart, MessageCircleReply } from "lucide-react";
+import Image from "next/image";
+import { Avatar } from "./atoms/Avatar";
 
 const ListComments = ({ comments }: { comments: IComments[] }) => {
   return (
     <div className="mx-auto space-y-3 w-full min-h-[150px] overflow-y-auto max-h-[300px]">
       {comments.reverse().map((comment, index) => (
         <div className="h-[120px] p-2 flex gap-3 border-b" key={index}>
-          <div className="w-[40px] h-[40px] rounded-full bg-neutral-300"></div>
+          <Avatar
+            alt={`Avatar do ${comment?.name}`}
+            name={comment?.name}
+            src={comment?.avatar}
+          />
+
           <div className="h-full w-4/5 ">
             <h3 className="text-neutral-600 font-semibold text-sm tracking-tight">
               {comment.name}
