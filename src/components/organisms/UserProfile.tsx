@@ -45,6 +45,8 @@ function UserProfileContent() {
   const { user, updateUser } = useAuth();
   const [name, setName] = useState(user?.name || "");
   const [bio, setBio] = useState(user?.bio || "");
+  const [originalName, setOriginalName] = useState(user?.name || "");
+  const [originalBio, setOriginalBio] = useState(user?.bio || "");
   const [avatar, setAvatar] = useState<string | null>(user?.avatar || null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [social, setSocial] = useState({
@@ -70,6 +72,7 @@ function UserProfileContent() {
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [triedSubmit, setTriedSubmit] = useState(false);
+  const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false);
   const SOCIAL_MEDIA_KEYS = [
     "github",
     "linkedin",
@@ -93,8 +96,20 @@ function UserProfileContent() {
     }
   }, [success]);
 
+  useEffect(() => {
+    return () => {
+      if (avatar && avatar.startsWith("blob:")) {
+        URL.revokeObjectURL(avatar);
+      }
+    };
+  }, [avatar]);
+
   const getAvatarUrl = (avatarPath: string | null) => {
     if (!avatarPath) return null;
+
+    if (avatarPath.startsWith("blob:")) {
+      return avatarPath;
+    }
 
     if (avatarPath.startsWith("http")) {
       return avatarPath;
@@ -130,6 +145,12 @@ function UserProfileContent() {
     }, {} as SocialErrors);
   };
 
+  const hasBasicInfoChanges = () => {
+    return (
+      name.trim() !== originalName.trim() || bio.trim() !== originalBio.trim()
+    );
+  };
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -143,8 +164,14 @@ function UserProfileContent() {
         return;
       }
 
+      // Limpar URL anterior se existir
+      if (avatar && avatar.startsWith("blob:")) {
+        URL.revokeObjectURL(avatar);
+      }
+
+      const blobUrl = URL.createObjectURL(file);
       setAvatarFile(file);
-      setAvatar(URL.createObjectURL(file));
+      setAvatar(blobUrl);
       setError("");
     }
   };
@@ -158,6 +185,9 @@ function UserProfileContent() {
 
       const response = await apiService.uploadAvatar(avatarFile);
       updateUser(response.user);
+
+      // Atualizar o estado local do avatar com a nova URL
+      setAvatar(response.user.avatar || null);
       setAvatarFile(null);
       setSuccess("Avatar atualizado com sucesso!");
     } catch (err: unknown) {
@@ -244,13 +274,6 @@ function UserProfileContent() {
       return;
     }
 
-    const errors = validateForm();
-    const hasSocialErrors = Object.values(errors).some((error) => error !== "");
-    if (hasSocialErrors) {
-      setSocialErrors(errors);
-      return;
-    }
-
     try {
       setLoading(true);
       setError("");
@@ -258,29 +281,19 @@ function UserProfileContent() {
       const updateData: {
         name?: string;
         bio?: string;
-        github?: string | undefined;
-        linkedin?: string | undefined;
-        twitter?: string | undefined;
-        instagram?: string | undefined;
       } = {
         name: name.trim(),
         bio: bio.trim() || undefined,
       };
 
-      Object.keys(social).forEach((key) => {
-        const value = social[key as keyof typeof social];
-        const originalValue =
-          originalSocial[key as keyof typeof originalSocial];
-        if (value !== originalValue) {
-          updateData[key as keyof typeof updateData] = value || undefined;
-        }
-      });
-
       const response = await apiService.updateProfile(updateData);
       updateUser(response.user);
       setOriginalSocial(social);
-      setSuccess("Perfil atualizado com sucesso!");
+      setOriginalName(name.trim());
+      setOriginalBio(bio.trim());
+      setSuccess("Informações básicas atualizadas com sucesso!");
       setTriedSubmit(false);
+      setIsEditingBasicInfo(false);
     } catch (err: unknown) {
       let errorMessage = "Erro ao atualizar perfil";
       if (err && typeof err === "object" && "response" in err) {
@@ -300,9 +313,15 @@ function UserProfileContent() {
   };
 
   async function handleSaveSocialField(key: SocialMedia, value: string) {
+    if (value && !isValidSocialUrl(value)) {
+      setSocialErrors((prev) => ({ ...prev, [key]: "URL inválida" }));
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
+      setSocialErrors((prev) => ({ ...prev, [key]: "" }));
 
       const updateData: { [key: string]: string | undefined } = {};
       updateData[key] = value || undefined;
@@ -398,10 +417,28 @@ function UserProfileContent() {
 
         <form onSubmit={handleSave} className="space-y-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Foto do Perfil
-            </h2>
-            <div className="flex items-center space-x-6">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Foto do Perfil
+              </h2>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (isEditingBasicInfo) {
+                    // Cancelar edição - resetar valores
+                    setName(originalName);
+                    setBio(originalBio);
+                  }
+                  setIsEditingBasicInfo(!isEditingBasicInfo);
+                }}
+                size="sm"
+              >
+                <Edit2 className="h-4 w-4 mr-1" />
+                {isEditingBasicInfo ? "Cancelar Edição" : "Editar Informações"}
+              </Button>
+            </div>
+            <div className="flex items-start space-x-6">
               <div className="relative">
                 <Avatar
                   src={getAvatarUrl(avatar)}
@@ -420,9 +457,13 @@ function UserProfileContent() {
                 </label>
               </div>
               <div className="flex-1">
-                <p className="text-sm text-gray-600 mb-2">
-                  Clique na câmera para alterar sua foto de perfil
-                </p>
+                <div className="mb-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {name || user?.name || "Nome não definido"}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-1">{user?.email}</p>
+                  {bio && <p className="text-sm text-gray-700 mt-2">{bio}</p>}
+                </div>
                 {avatarFile && (
                   <div className="space-y-2">
                     <Button
@@ -431,6 +472,7 @@ function UserProfileContent() {
                       loading={uploadingAvatar}
                       disabled={uploadingAvatar}
                       size="sm"
+                      className="mr-4"
                     >
                       Salvar nova foto
                     </Button>
@@ -438,6 +480,9 @@ function UserProfileContent() {
                       type="button"
                       variant="outline"
                       onClick={() => {
+                        if (avatar && avatar.startsWith("blob:")) {
+                          URL.revokeObjectURL(avatar);
+                        }
                         setAvatarFile(null);
                         setAvatar(user?.avatar || null);
                       }}
@@ -451,56 +496,58 @@ function UserProfileContent() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Informações Básicas
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nome completo *
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Seu nome completo"
-                />
-                {triedSubmit && !name.trim() && (
-                  <p className="text-red-600 text-sm mt-1">
-                    Nome é obrigatório
+          {isEditingBasicInfo && (
+            <div className="bg-white rounded-lg shadow p-6 transition-all duration-300 ease-in-out">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Editar Informações Básicas
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nome completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Seu nome completo"
+                  />
+                  {triedSubmit && !name.trim() && (
+                    <p className="text-red-600 text-sm mt-1">
+                      Nome é obrigatório
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={user?.email || ""}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Email não pode ser alterado
                   </p>
-                )}
+                </div>
               </div>
-              <div>
+              <div className="mt-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
+                  Biografia
                 </label>
-                <input
-                  type="email"
-                  value={user?.email || ""}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Conte um pouco sobre você..."
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Email não pode ser alterado
-                </p>
               </div>
             </div>
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Biografia
-              </label>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Conte um pouco sobre você..."
-              />
-            </div>
-          </div>
+          )}
 
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -638,7 +685,9 @@ function UserProfileContent() {
             <Button
               type="submit"
               loading={loading}
-              disabled={loading}
+              disabled={
+                loading || !isEditingBasicInfo || !hasBasicInfoChanges()
+              }
               size="lg"
             >
               Salvar Alterações

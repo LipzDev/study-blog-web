@@ -88,22 +88,26 @@ export function ForgotPasswordForm() {
                 </div>
               )}
 
-              <Input
-                label="Email"
-                type="email"
-                placeholder="seu@email.com"
-                error={errors.email?.message}
-                {...register("email")}
-              />
+              {!success && (
+                <>
+                  <Input
+                    label="Email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    error={errors.email?.message}
+                    {...register("email")}
+                  />
 
-              <Button
-                type="submit"
-                className="w-full"
-                loading={isLoading}
-                disabled={isLoading}
-              >
-                Enviar email de recuperação
-              </Button>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    loading={isLoading}
+                    disabled={isLoading}
+                  >
+                    Enviar email de recuperação
+                  </Button>
+                </>
+              )}
 
               <div className="text-center">
                 <Link
