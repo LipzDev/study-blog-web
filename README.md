@@ -41,7 +41,7 @@ yarn dev
 
 ### 🔐 **Conta e Acesso**
 
-- Crie sua conta e verifique seu email
+- Crie sua conta com email verificado
 - Faça login com email e senha
 - Recupere sua senha se esquecer
 - Gerencie seu perfil com foto e bio
@@ -50,10 +50,9 @@ yarn dev
 ### 📝 **Conteúdo**
 
 - Veja posts recentes na página inicial
-- Explore todos os posts com busca e filtros
+- Explore todos os seus posts ou de outros com busca e filtros
 - Leia posts completos com imagens
-- Crie e edite posts (se for admin)
-- Faça upload de imagens para seus posts
+- Crie e edite seus posts
 
 ### 👥 **Gestão (para admins)**
 
@@ -64,19 +63,19 @@ yarn dev
 
 ### 🎨 **Interface**
 
-- Design responsivo que funciona em qualquer dispositivo
+- Design responsivo que funciona em dispositivos mobile.
 - Componentes modernos e intuitivos
 - Feedback visual para todas as ações
 - Navegação simples e clara
 
 ## 🛠️ Tecnologias
 
-- **Next.js 12** - Framework React
-- **TypeScript** - Tipagem segura
-- **Tailwind CSS** - Estilização moderna
-- **React Hook Form** - Formulários eficientes
-- **Axios** - Comunicação com API
-- **Lucide React** - Ícones bonitos
+- **Next.js 15**
+- **TypeScript**
+- **Tailwind CSS**
+- **React Hook Form**
+- **Axios**
+- **Lucide React**
 
 ## 🎯 Próximos passos
 
