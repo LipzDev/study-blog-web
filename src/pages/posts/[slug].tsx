@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
+import CommentsPostForm from "@/components/CommentsPostForm";
 
 export default function PostPage() {
   const router = useRouter();
@@ -232,7 +233,7 @@ export default function PostPage() {
           <div className="flex items-center justify-between text-sm text-gray-500">
             <div>
               <p>
-                Postado por{" "}
+                Postado por:{" "}
                 <span className="font-medium">{post?.author?.name}</span>
               </p>
               <p>
@@ -240,6 +241,7 @@ export default function PostPage() {
               </p>
             </div>
           </div>
+          <CommentsPostForm />
         </div>
 
         {/* Modal de Exclusão de Post */}
