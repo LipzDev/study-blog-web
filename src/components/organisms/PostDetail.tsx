@@ -139,10 +139,10 @@ export function PostDetail() {
         post.author &&
         post.author.role !== "super_admin") ||
       // User só pode editar o próprio post
-      (user.role === "user" && user.id === post.authorId));
+      (user.role === "user" && user.id === post.author.id));
   const canDelete =
     user &&
-    (user.id === post.authorId ||
+    (user.id === post.author.id ||
       user.role === "admin" ||
       user.role === "super_admin");
 

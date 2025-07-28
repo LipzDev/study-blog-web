@@ -33,7 +33,6 @@ export interface Post {
   text: string;
   image?: string;
   imagePath?: string;
-  authorId: string;
   author: User;
   createdAt: string;
   updatedAt: string;

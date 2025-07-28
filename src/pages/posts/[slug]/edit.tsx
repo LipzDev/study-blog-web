@@ -117,7 +117,7 @@ const EditPostPage = () => {
     user &&
     (user.role === "super_admin" ||
       user.role === "admin" ||
-      (user.role === "user" && user.id === post.authorId));
+      (user.role === "user" && user.id === post.author.id));
 
   if (!canEdit) {
     return (
