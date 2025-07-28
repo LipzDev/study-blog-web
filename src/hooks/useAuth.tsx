@@ -40,12 +40,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem("token");
-      const userData = localStorage.getItem("user");
 
-      if (token && userData) {
+      if (token) {
         try {
           const user = await apiService.getProfile();
           setUser(user);
+          // Atualizar localStorage com dados frescos
+          localStorage.setItem("user", JSON.stringify(user));
         } catch (error) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
@@ -155,7 +156,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateUser = (user: User) => {
+    console.log("Updating user in context:", {
+      github: user.github,
+      linkedin: user.linkedin,
+      twitter: user.twitter,
+      instagram: user.instagram,
+    });
     setUser(user);
+    // Atualizar também no localStorage para manter consistência
+    localStorage.setItem("user", JSON.stringify(user));
   };
 
   return (

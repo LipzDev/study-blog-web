@@ -104,6 +104,35 @@ function UserProfileContent() {
     };
   }, [avatar]);
 
+  // Sincronizar estado local com dados do usuário quando user mudar
+  useEffect(() => {
+    if (user) {
+      console.log("Syncing local state with user data:", {
+        github: user.github,
+        linkedin: user.linkedin,
+        twitter: user.twitter,
+        instagram: user.instagram,
+      });
+      setName(user.name || "");
+      setBio(user.bio || "");
+      setOriginalName(user.name || "");
+      setOriginalBio(user.bio || "");
+      setAvatar(user.avatar || null);
+      setSocial({
+        github: user.github || "",
+        linkedin: user.linkedin || "",
+        twitter: user.twitter || "",
+        instagram: user.instagram || "",
+      });
+      setOriginalSocial({
+        github: user.github || "",
+        linkedin: user.linkedin || "",
+        twitter: user.twitter || "",
+        instagram: user.instagram || "",
+      });
+    }
+  }, [user]);
+
   const getAvatarUrl = (avatarPath: string | null) => {
     if (!avatarPath) return null;
 
@@ -231,15 +260,21 @@ function UserProfileContent() {
       setLoading(true);
       setError("");
 
-      const updateData: { [key: string]: string | undefined } = {};
-      updateData[key] = undefined;
+      console.log("Current social state before removal:", social);
 
+      const updateData: { [key: string]: string | null } = {};
+      updateData[key] = null;
+
+      console.log("Sending update data:", updateData);
       const response = await apiService.updateProfile(updateData);
+      console.log("Received response:", response.user);
       updateUser(response.user);
 
       setSocial((prev) => ({ ...prev, [key]: "" }));
       setOriginalSocial((prev) => ({ ...prev, [key]: "" }));
       setEditingSocial((prev) => ({ ...prev, [key]: false }));
+
+      console.log("Social state after removal:", { ...social, [key]: "" });
 
       setSuccess(
         `${key.charAt(0).toUpperCase() + key.slice(1)} removido com sucesso!`,
@@ -323,10 +358,12 @@ function UserProfileContent() {
       setError("");
       setSocialErrors((prev) => ({ ...prev, [key]: "" }));
 
-      const updateData: { [key: string]: string | undefined } = {};
-      updateData[key] = value || undefined;
+      const updateData: { [key: string]: string | null } = {};
+      updateData[key] = value || null;
 
+      console.log("Sending update data:", updateData);
       const response = await apiService.updateProfile(updateData);
+      console.log("Received response:", response.user);
       updateUser(response.user);
 
       setSocial((prev) => ({ ...prev, [key]: value }));
@@ -557,7 +594,7 @@ function UserProfileContent() {
               {getRoleBadge(user?.role || "user")}
               <span className="text-sm text-gray-600">
                 {user?.role === "super_admin"
-                  ? "Você tem acesso total ao sistema"
+                  ? "Você tem acesso total ao sistema."
                   : user?.role === "admin"
                     ? "Você pode gerenciar usuários e conteúdo"
                     : "Você pode criar e editar suas próprias postagens"}
