@@ -36,10 +36,10 @@ export function ForgotPasswordForm() {
       setError(null);
       setSuccess(null);
 
-      await forgotPassword(data.email);
+      const response = await forgotPassword(data.email);
 
       setSuccess(
-        "Email de recuperação enviado! Verifique sua caixa de entrada.",
+        "Solicitação processada! Se este email estiver cadastrado, você receberá um link de recuperação em sua caixa de entrada.",
       );
       reset();
     } catch (err: unknown) {

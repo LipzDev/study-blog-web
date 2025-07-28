@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as any;
         if (axiosError.response?.status === 409) {
-          errorMessage = "Usuário com este email já existe";
+          errorMessage = "Já existe um usuário com este email.";
         }
       }
 
